@@ -1,0 +1,25 @@
+bodies: []
+joints: []
+sensors: [SENSOR Proximity0]
+actuators: []
+high resolution path: /
+low resolution path: /
+ignore inter-collision: true
+namespace: /ambf/env/
+# publish children names: true
+
+SENSOR Proximity0:
+  name: Proximity0
+  type: Proximity
+  location:
+    orientation: {p: -1.57079, r: 0.0, y: 0.0}
+    position: {x: 0.0, y: 0.0, z: 0.0}
+  parametric:
+    resolution: 8
+    horizontal angle: 1.0
+    vertical angle: 1.0
+    start offset: 0.01
+  range: 0.1
+  parent: BODY Endoscope Tip
+  visible: True
+  visible size: 0.002
