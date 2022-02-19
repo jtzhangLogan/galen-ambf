@@ -9,6 +9,13 @@ cMesh* arrow_ATI_nano_x;
 cMesh* arrow_ATI_nano_y;
 cMesh* arrow_ATI_nano_z;
 
+double map_joints(double x, double in_max, double in_min, double out_max, double out_min) {
+    //std::cerr << x << "---" << in_max << "---" << in_min << "---" << out_max << "---" << out_min << "---" << std::endl;
+    double  result = (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+    //std::cerr << result << std::endl;
+    return result;
+}
+
 int GalenControlPlugin::init(const afModelPtr a_modelPtr, afModelAttribsPtr a_attribs){
     /*
      * naive initialization ignoring input device
@@ -56,17 +63,18 @@ int GalenControlPlugin::init(const afModelPtr a_modelPtr, afModelAttribsPtr a_at
     // ----------------T_TipOffset.setLocalRot(rot);
 
     // initialize joint pointers
+    joints.push_back(m_modelPtr->getJoint("carriage3_joint"));
     joints.push_back(m_modelPtr->getJoint("carriage1_joint"));
     joints.push_back(m_modelPtr->getJoint("carriage2_joint"));
-    joints.push_back(m_modelPtr->getJoint("carriage3_joint"));
     joints.push_back(m_modelPtr->getJoint("roll_joint"));
     joints.push_back(m_modelPtr->getJoint("tilt_joint"));
 
     numJoints = static_cast<int>(joints.size());
 
-    std::cerr << numJoints << std::endl ;
+    std::cerr << "number of joints " << numJoints << std::endl;
 
     // initialize force vector and add to world plane
+    /*
     arrow_ATI_nano_x = new cMesh();
     arrow_ATI_nano_y = new cMesh();
     arrow_ATI_nano_z = new cMesh();
@@ -77,9 +85,9 @@ int GalenControlPlugin::init(const afModelPtr a_modelPtr, afModelAttribsPtr a_at
 
     m_modelPtr->getWorldPtr()->addSceneObjectToWorld(arrow_ATI_nano_x);
     m_modelPtr->getWorldPtr()->addSceneObjectToWorld(arrow_ATI_nano_y);
-    m_modelPtr->getWorldPtr()->addSceneObjectToWorld(arrow_ATI_nano_z);
+    m_modelPtr->getWorldPtr()->addSceneObjectToWorld(arrow_ATI_nano_z); */
 
-    ATI = m_modelPtr->getJoint("Tilt Distal Linkage and Force Sensor-Endoscope 35 degree in REMS");
+    // ATI = m_modelPtr->getJoint("Tilt Distal Linkage and Force Sensor-Endoscope 35 degree in REMS");
 
     return 1;
 }
@@ -92,10 +100,10 @@ void GalenControlPlugin::graphicsUpdate() {
         start_counter++;
     }
 
-    std::cerr << ATI->getLocalPos() << std::endl;
-    std::cerr << ATI->getLocalRot().getRow(0) << std::endl << ATI->getLocalRot().getRow(1) << std::endl << ATI->getLocalRot().getRow(2) << std::endl;
+    //std::cerr << ATI->getLocalPos() << std::endl;
+    //std::cerr << ATI->getLocalRot().getRow(0) << std::endl << ATI->getLocalRot().getRow(1) << std::endl << ATI->getLocalRot().getRow(2) << std::endl;
 
-    arrow_ATI_nano_z->setLocalRot(ATI->getLocalRot());
+    //arrow_ATI_nano_z->setLocalRot(ATI->getLocalRot());
 }
 
 void GalenControlPlugin::physicsUpdate(double dt){
@@ -108,20 +116,19 @@ void GalenControlPlugin::physicsUpdate(double dt){
     }
     /*
     else if (start_counter < counter_toggle){
-        // TODO: add inverse kinematic
-
+        // move to initial position
         vector<double> measured_jp = galenInterface->get_measured_jp();
 
-        measured_jp[2] *= 10.; // Compensate for 2nd joint
-
         for (int idx = 0 ; idx < numJoints ; idx++){
+            double initialPos = map_joints(measured_jp[idx], physical_joint_limits_upper[idx], physical_joint_limits_lower[idx],
+                                           joints[idx]->getUpperLimit(), joints[idx]->getLowerLimit());
             joints[idx]->commandPosition(measured_jp[idx]);
         }
-        // TODO: why this part?
-        m_psmIK.m_FK->computeFK(measured_jp, 4, T_7_0);
 
+        // TODO: why this part?
+        // m_psmIK.m_FK->computeFK(measured_jp, 4, T_7_0);
         return;
-    } */
+    }*/
 
     // update physics based on control mode
     switch (controlMode) {
@@ -130,23 +137,32 @@ void GalenControlPlugin::physicsUpdate(double dt){
             /*
              * follow real world robot movement
              */
-
+            /*
             // get mesasured joint states from real world robot via ros
-            vector<double> measured_jp = galenInterface->get_measured_jp();
-            vector<double> measured_tra_jv = galenInterface->get_measured_tra_jv();
-            vector<double> measured_rot_jv = galenInterface->get_measured_rot_jv();
+            vector<double> measured_jv = galenInterface->get_measured_jv();
+
+            // vector<double> measured_tra_jv = galenInterface->get_measured_tra_jv();
+            // vector<double> measured_rot_jv = galenInterface->get_measured_rot_jv();
 
             // set simulation joint angle
             // TODO: need to add new logic for commandPosition?
-            /*
-            for (int idx = 0 ; idx < numPrismaticJoints ; idx++){
+
+            for (int idx = 0 ; idx < numJoints ; idx++){
                 // move at actual joint velocity
-                joints[idx]->commandVelocity(measured_tra_jv[idx]);
-            }
-            for (int idx = 0 ; idx < numRevoluteJoints ; idx++){
-                // move at actual joint velocity
-                joints[idx+numPrismaticJoints]->commandVelocity(measured_rot_jv[idx]);
+                double commandVelocity = map_joints(measured_jv[idx], physical_joint_limits_upper[idx], physical_joint_limits_lower[idx],
+                                                    joints[idx]->getUpperLimit(), joints[idx]->getLowerLimit());
+                std::cerr << commandVelocity << std::endl;
+                joints[idx]->commandVelocity(commandVelocity);
             }*/
+            std::cerr << "position" << std::endl;
+            vector<double> measured_jp = galenInterface->get_measured_jp();
+
+            for (int idx = 0 ; idx < numJoints ; idx++){
+                double initialPos = map_joints(measured_jp[idx], physical_joint_limits_upper[idx], physical_joint_limits_lower[idx],
+                                               joints[idx]->getUpperLimit(), joints[idx]->getLowerLimit());
+                joints[idx]->commandPosition(measured_jp[idx]);
+            }
+
         }
         break;
 

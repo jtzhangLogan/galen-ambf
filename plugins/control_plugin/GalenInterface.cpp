@@ -15,16 +15,22 @@ GalenInterface::GalenInterface() {
     // TODO: update topic name
     sub_mobile_cp   = ros_node->subscribe("/Fake_Galen_CP_Publisher", 1, &GalenInterface::_mobile_cp_CB, this);
     sub_tool_cp     = ros_node->subscribe("/Fake_Galen_CP_Publisher", 1, &GalenInterface::_tool_cp_CB, this);
-    sub_measured_jp = ros_node->subscribe("/Fake_Galen_JS_Publisher", 1, &GalenInterface::_measured_jp_CB, this);
+
+    // Topic name is: /rems/robot_state
+    // msg type: REMS/RobotState
+    // sub_measured_jp = ros_node->subscribe("/rems/robot_state", 1, &GalenInterface::_measured_jp_CB, this);
+
+    // TMP solutions: use /rems/measured_js from Python node
+    sub_measured_jp = ros_node->subscribe("/rems/robot_state", 1, &GalenInterface::_measured_jp_CB, this);
 
     // TODO: add callback, fix namespace
     // sub_tf_patient2world = ros_node->subscribe("/Fake_Galen_JS_Publisher", 1, &GalenInterface::_measured_jp_CB, this); // get transformation from patient to the OR coordinate frame
     // sub_tf_patient2robot = ros_node->subscribe("/Fake_Galen_JS_Publisher", 1, &GalenInterface::_measured_jp_CB, this); // get transformation from patient to robot (registration result)
 
     // TODO: add subscriber to joint velocities, need to combine them to a single topic if possible
-    sub_measured_tra_jv = ros_node->subscribe("/rems/joint_velocity_translation", 1, &GalenInterface::_measured_tra_jv_CB, this); // get transformation from patient to robot (registration result)
-    sub_measured_rot_jv = ros_node->subscribe("/rems/joint_velocity_rotation", 1, &GalenInterface::_measured_rot_jv_CB, this); // get transformation from patient to robot (registration result)
-    sub_measured_cf = ros_node->subscribe("/rems/measured_cf", 1, &GalenInterface::_measured_cf_CB, this);
+    //sub_measured_tra_jv = ros_node->subscribe("/rems/joint_velocity_translation", 1, &GalenInterface::_measured_tra_jv_CB, this); // get transformation from patient to robot (registration result)
+    //sub_measured_rot_jv = ros_node->subscribe("/rems/joint_velocity_rotation", 1, &GalenInterface::_measured_rot_jv_CB, this); // get transformation from patient to robot (registration result)
+    //sub_measured_cf = ros_node->subscribe("/rems/measured_cf", 1, &GalenInterface::_measured_cf_CB, this);
 
     // initialize publisher
     // TODO: may not be necessary since Galen may not have servo option
@@ -54,6 +60,10 @@ vector<double>& GalenInterface::get_measured_jp() {
     return measured_jp;
 }
 
+vector<double>& GalenInterface::get_measured_jv() {
+    return measured_jv;
+}
+
 vector<double>& GalenInterface::get_measured_tra_jv() {
     return measured_tra_jv;
 }
@@ -65,12 +75,14 @@ vector<double>& GalenInterface::get_measured_rot_jv() {
 vector<double>& GalenInterface::get_measured_cf() {
     return measured_cf;
 }
-
-void GalenInterface::_measured_jp_CB(sensor_msgs::JointStateConstPtr msg) {
+// plugin_msgs::RobotStateConstPtr   sensor_msgs::JointStateConstPtr
+void GalenInterface::_measured_jp_CB(plugin_msgs::RobotStateConstPtr msg) {
 /*
  * ideally, this should receive data from five joints
  */
-    measured_jp = msg->position;
+    measured_jp = msg->joint_position;
+    measured_jv = msg->joint_velocity;
+    //std::cerr << measured_jp[0] << std::endl;
 }
 
 void GalenInterface::_tool_cp_CB(geometry_msgs::TransformStampedConstPtr msg) {

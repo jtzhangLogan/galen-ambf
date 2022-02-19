@@ -52,6 +52,10 @@ class GalenControlPlugin: public afModelPlugin {
     // TODO: why making them global on github?
     cGenericHapticDevicePtr g_hapticDevice;
     cHapticDeviceHandler* g_deviceHandler;
+
+    // TODO: integrate into robot model
+    vector<double> physical_joint_limits_lower = {-233.0, -272.0, -237.0, -1.57, -1.04};
+    vector<double> physical_joint_limits_upper = {263.0, 241.0, 254.0, 1.57, 0.96};
 };
 
 AF_REGISTER_MODEL_PLUGIN(GalenControlPlugin)

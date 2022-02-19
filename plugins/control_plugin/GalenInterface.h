@@ -12,6 +12,8 @@
 #include <sensor_msgs/JointState.h>
 #include <math/CTransform.h>
 
+#include <plugin_msgs/RobotState.h>
+
 
 using namespace chai3d;
 using namespace std;
@@ -20,7 +22,9 @@ class GalenInterface {
 
 private:
     // robot states
-    vector<double> measured_jp;    // measured 5 joints states
+    vector<double> measured_jp;    // measured joint position
+    vector<double> measured_jv;    // measured joint velocity
+
     cTransform     mobile_cp;      // mobile platform cartesian position
     cTransform     tool_cp;        // tool cartesian position
 
@@ -51,7 +55,8 @@ public:
     // subscriber callback functions
     void _mobile_cp_CB(geometry_msgs::TransformStampedConstPtr);
     void _tool_cp_CB(geometry_msgs::TransformStampedConstPtr);
-    void _measured_jp_CB(sensor_msgs::JointStateConstPtr);
+    // void _measured_jp_CB(sensor_msgs::JointStateConstPtr);
+    void _measured_jp_CB(plugin_msgs::RobotStateConstPtr);
 
     void _measured_tra_jv_CB(geometry_msgs::Vector3ConstPtr);
     void _measured_rot_jv_CB(geometry_msgs::Vector3ConstPtr);
@@ -62,6 +67,7 @@ public:
 
     // access functions
     vector<double>& get_measured_jp();
+    vector<double>& get_measured_jv();
     vector<double>& get_measured_tra_jv();
     vector<double>& get_measured_rot_jv();
     vector<double>& get_measured_cf();
