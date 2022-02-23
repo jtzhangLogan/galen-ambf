@@ -47,7 +47,8 @@ class GalenControlPlugin: public afModelPlugin {
     int numPrismaticJoints = 3;
     int numRevoluteJoints = 2;
     vector<afJointPtr> joints;
-    afJointPtr ATI;
+    afRigidBodyPtr ATI;
+    cMatrix3d rot_ati_ambf;
 
     // TODO: why making them global on github?
     cGenericHapticDevicePtr g_hapticDevice;

@@ -63,18 +63,17 @@ int GalenControlPlugin::init(const afModelPtr a_modelPtr, afModelAttribsPtr a_at
     // ----------------T_TipOffset.setLocalRot(rot);
 
     // initialize joint pointers
-    joints.push_back(m_modelPtr->getJoint("carriage3_joint"));
     joints.push_back(m_modelPtr->getJoint("carriage1_joint"));
     joints.push_back(m_modelPtr->getJoint("carriage2_joint"));
+    joints.push_back(m_modelPtr->getJoint("carriage3_joint"));
     joints.push_back(m_modelPtr->getJoint("roll_joint"));
     joints.push_back(m_modelPtr->getJoint("tilt_joint"));
 
     numJoints = static_cast<int>(joints.size());
 
-    std::cerr << "number of joints " << numJoints << std::endl;
+    std::cerr << numJoints << std::endl ;
 
     // initialize force vector and add to world plane
-    /*
     arrow_ATI_nano_x = new cMesh();
     arrow_ATI_nano_y = new cMesh();
     arrow_ATI_nano_z = new cMesh();
@@ -85,10 +84,14 @@ int GalenControlPlugin::init(const afModelPtr a_modelPtr, afModelAttribsPtr a_at
 
     m_modelPtr->getWorldPtr()->addSceneObjectToWorld(arrow_ATI_nano_x);
     m_modelPtr->getWorldPtr()->addSceneObjectToWorld(arrow_ATI_nano_y);
-    m_modelPtr->getWorldPtr()->addSceneObjectToWorld(arrow_ATI_nano_z); */
+    m_modelPtr->getWorldPtr()->addSceneObjectToWorld(arrow_ATI_nano_z);
 
-    // ATI = m_modelPtr->getJoint("Tilt Distal Linkage and Force Sensor-Endoscope 35 degree in REMS");
+    // find ATI sensor body
+    ATI = m_modelPtr->getRigidBody("Tilt Distal Linkage and Force Sensor");
 
+    rot_ati_ambf.setCol0(cVector3d(0, 1, 0));
+    rot_ati_ambf.setCol1(cVector3d(0, 0, 1));
+    rot_ati_ambf.setCol2(cVector3d(-1, 0, 0));
     return 1;
 }
 
@@ -100,10 +103,60 @@ void GalenControlPlugin::graphicsUpdate() {
         start_counter++;
     }
 
-    //std::cerr << ATI->getLocalPos() << std::endl;
-    //std::cerr << ATI->getLocalRot().getRow(0) << std::endl << ATI->getLocalRot().getRow(1) << std::endl << ATI->getLocalRot().getRow(2) << std::endl;
+    // ------------------------------------------------
+    // Update ATI force arrow
+    // ------------------------------------------------
 
-    //arrow_ATI_nano_z->setLocalRot(ATI->getLocalRot());
+    // find ATI position, add an offset to the arrow
+    auto offset = cVector3d(0.1, 0.1, 0.1);
+
+    /*
+     * update z
+     */
+    arrow_ATI_nano_z->clear();
+    // change color
+    cColorf color_z;
+    color_z.setBlue();
+    // change arrow length according to measured force magnitude
+    // vector<double> measured_cf = galenInterface->get_measured_cf();
+    // double a_length_x = measured_cf[0];
+    // double a_length_y = measured_cf[1];
+    // double a_length_z = measured_cf[2];
+    double a_length_x = 0.3;
+    double a_length_y = 0.3;
+    double a_length_z = 0.3;
+    // map from force magnitude to length, now we clamp the length between 0.1 to 1.0
+
+    // TODO: change color based on its magnitude, increase redness
+
+
+    // update z
+    cCreateArrow(arrow_ATI_nano_z, a_length_z, 0.01, 0.1, 0.03,
+                 false, 32, cVector3d(0,0,1), cVector3d(0,0,0), color_z);
+    arrow_ATI_nano_z->setLocalRot(ATI->getLocalRot() * rot_ati_ambf);
+    arrow_ATI_nano_z->setLocalPos(ATI->getLocalPos() + offset);
+
+    // update y
+    arrow_ATI_nano_y->clear();
+    cColorf color_y;
+    color_y.setRed();
+    cCreateArrow(arrow_ATI_nano_y, a_length_y, 0.01, 0.1, 0.03,
+                 false, 32, cVector3d(0,1,0), cVector3d(0,0,0), color_y);
+    arrow_ATI_nano_y->setLocalTransform(ATI->getLocalRot() * rot_ati_ambf);
+    arrow_ATI_nano_y->setLocalPos(ATI->getLocalPos() + offset);
+
+    // update x
+    arrow_ATI_nano_x->clear();
+    cColorf color_x;
+    color_x.setYellow();
+    cCreateArrow(arrow_ATI_nano_x, a_length_x, 0.01, 0.1, 0.03,
+                 false, 32, cVector3d(1,0,0), cVector3d(0,0,0), color_x);
+    arrow_ATI_nano_x->setLocalTransform(ATI->getLocalRot() * rot_ati_ambf);
+    arrow_ATI_nano_x->setLocalPos(ATI->getLocalPos() + offset);
+
+    int i = 1;
+
+    // afJointAttributes
 }
 
 void GalenControlPlugin::physicsUpdate(double dt){
@@ -116,19 +169,20 @@ void GalenControlPlugin::physicsUpdate(double dt){
     }
     /*
     else if (start_counter < counter_toggle){
-        // move to initial position
+        // TODO: add inverse kinematic
+
         vector<double> measured_jp = galenInterface->get_measured_jp();
 
+        measured_jp[2] *= 10.; // Compensate for 2nd joint
+
         for (int idx = 0 ; idx < numJoints ; idx++){
-            double initialPos = map_joints(measured_jp[idx], physical_joint_limits_upper[idx], physical_joint_limits_lower[idx],
-                                           joints[idx]->getUpperLimit(), joints[idx]->getLowerLimit());
             joints[idx]->commandPosition(measured_jp[idx]);
         }
-
         // TODO: why this part?
-        // m_psmIK.m_FK->computeFK(measured_jp, 4, T_7_0);
+        m_psmIK.m_FK->computeFK(measured_jp, 4, T_7_0);
+
         return;
-    }*/
+    } */
 
     // update physics based on control mode
     switch (controlMode) {
@@ -137,32 +191,23 @@ void GalenControlPlugin::physicsUpdate(double dt){
             /*
              * follow real world robot movement
              */
-            /*
-            // get mesasured joint states from real world robot via ros
-            vector<double> measured_jv = galenInterface->get_measured_jv();
 
+            // get mesasured joint states from real world robot via ros
+            // vector<double> measured_jp = galenInterface->get_measured_jp();
             // vector<double> measured_tra_jv = galenInterface->get_measured_tra_jv();
             // vector<double> measured_rot_jv = galenInterface->get_measured_rot_jv();
 
             // set simulation joint angle
             // TODO: need to add new logic for commandPosition?
-
-            for (int idx = 0 ; idx < numJoints ; idx++){
+            /*
+            for (int idx = 0 ; idx < numPrismaticJoints ; idx++){
                 // move at actual joint velocity
-                double commandVelocity = map_joints(measured_jv[idx], physical_joint_limits_upper[idx], physical_joint_limits_lower[idx],
-                                                    joints[idx]->getUpperLimit(), joints[idx]->getLowerLimit());
-                std::cerr << commandVelocity << std::endl;
-                joints[idx]->commandVelocity(commandVelocity);
-            }*/
-            std::cerr << "position" << std::endl;
-            vector<double> measured_jp = galenInterface->get_measured_jp();
-
-            for (int idx = 0 ; idx < numJoints ; idx++){
-                double initialPos = map_joints(measured_jp[idx], physical_joint_limits_upper[idx], physical_joint_limits_lower[idx],
-                                               joints[idx]->getUpperLimit(), joints[idx]->getLowerLimit());
-                joints[idx]->commandPosition(measured_jp[idx]);
+                joints[idx]->commandVelocity(measured_tra_jv[idx]);
             }
-
+            for (int idx = 0 ; idx < numRevoluteJoints ; idx++){
+                // move at actual joint velocity
+                joints[idx+numPrismaticJoints]->commandVelocity(measured_rot_jv[idx]);
+            }*/
         }
         break;
 
