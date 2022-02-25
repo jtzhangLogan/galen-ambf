@@ -56,6 +56,19 @@ class GalenControlPlugin: public afModelPlugin {
     // TODO: integrate into robot model
     vector<double> physical_joint_limits_lower = {-233.0, -272.0, -237.0, -1.57, -1.04};
     vector<double> physical_joint_limits_upper = {263.0, 241.0, 254.0, 1.57, 0.96};
+
+    //Volumetric Drilling variables/function declare
+    afWorldPtr m_worldPtr;
+    cColorb m_zeroColor;
+    cColorb m_boneColor;
+    cColorb m_storedColor;
+    afRigidBodyPtr m_drillRigidBody;
+    cShapeSphere* m_burrMesh;
+    afVolumePtr m_volumeObject;
+    cVoxelObject* m_voxelObj;
+
+    int GalenControlPlugin::volumetricDrillingInit(afWorldPtr m_worldPtr);         //Init function for the components of volumetric drilling
+
 };
 
 AF_REGISTER_MODEL_PLUGIN(GalenControlPlugin)

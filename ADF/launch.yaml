@@ -8,3 +8,9 @@ multibody configs:
   - "./sensors_actuators.yaml" #1
   - "./skull.yaml" #2
   - "./unconstrained-platform-version/galen.yaml" #3
+  - "./drill.yaml" #4
+  - "./volume_171.yaml" #5
+  - "./volume_256.yaml" #6
+  - "./volume_512.yaml" #7
+  - "./drill.yaml" #8
+

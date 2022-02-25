@@ -22,6 +22,7 @@ int GalenControlPlugin::init(const afModelPtr a_modelPtr, afModelAttribsPtr a_at
      */
 
     m_modelPtr = a_modelPtr;
+    m_worldPtr = m_modelPtr->getWorldPtr();     //Ptr to the simulation world
 
     galenInterface = new GalenInterface();
 
@@ -89,7 +90,50 @@ int GalenControlPlugin::init(const afModelPtr a_modelPtr, afModelAttribsPtr a_at
 
     // ATI = m_modelPtr->getJoint("Tilt Distal Linkage and Force Sensor-Endoscope 35 degree in REMS");
 
+    /* Volumetric Drilling Init*/
+    volumetricDrillingInit(m_worldPtr);
+
     return 1;
+}
+
+///
+/// \brief This method initializes necessary components of volumetric drilling function
+/// \param m_worldPtr    A world that contains all objects of the virtual environment
+/// \return 1 if successful, 0 otherwise.
+///
+int GalenControlPlugin::volumetricDrillingInit(afWorldPtr m_worldPtr){
+
+    //Color of voxels
+    m_zeroColor = cColorb(0x00, 0x00, 0x00, 0x00);
+    m_boneColor = cColorb(255, 249, 219, 255);
+    m_storedColor = cColorb(0x00, 0x00, 0x00, 0x00);
+
+    //Setup drill model and voxel object
+    m_drillRigidBody = m_worldPtr->getRigidBody("mastoidectomy_drill");
+    if (!m_drillRigidBody){
+        cerr << "ERROR! FAILED TO FIND DRILL RIGID BODY NAMED " << "mastoidectomy_drill" << endl;
+        return -1;
+    }
+    else{
+        m_burrMesh = new cShapeSphere(0.043); // 2mm by default with 1 AMBF unit = 0.049664 m
+        m_burrMesh->setRadius(0.043);
+        m_burrMesh->m_material->setBlack();
+        m_burrMesh->m_material->setShininess(0);
+        m_burrMesh->m_material->m_specular.set(0, 0, 0);
+        m_burrMesh->setShowEnabled(true);
+        m_drillRigidBody->addChildSceneObject(m_burrMesh, cTransform());
+        m_worldPtr->addSceneObjectToWorld(m_burrMesh);
+    }
+
+    m_volumeObject = m_worldPtr->getVolume("mastoidectomy_volume");
+    if (!m_volumeObject){
+        cerr << "ERROR! FAILED TO FIND DRILL VOLUME NAMED " << "mastoidectomy_volume" << endl;
+        return -1;
+    }
+    else{
+        m_voxelObj = m_volumeObject->getInternalVolume();
+    }
+
 }
 
 int start_counter = 0;
