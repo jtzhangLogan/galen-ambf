@@ -9,7 +9,7 @@ cMesh* arrow_ATI_nano_x;
 cMesh* arrow_ATI_nano_y;
 cMesh* arrow_ATI_nano_z;
 
-double map_joints(double x, double in_max, double in_min, double out_max, double out_min) {
+double map_general(double x, double in_max, double in_min, double out_max, double out_min) {
     //std::cerr << x << "---" << in_max << "---" << in_min << "---" << out_max << "---" << out_min << "---" << std::endl;
     double  result = (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
     //std::cerr << result << std::endl;
@@ -89,9 +89,12 @@ int GalenControlPlugin::init(const afModelPtr a_modelPtr, afModelAttribsPtr a_at
     // find ATI sensor body
     ATI = m_modelPtr->getRigidBody("Tilt Distal Linkage and Force Sensor");
 
-    rot_ati_ambf.setCol0(cVector3d(0, 1, 0));
-    rot_ati_ambf.setCol1(cVector3d(0, 0, 1));
-    rot_ati_ambf.setCol2(cVector3d(-1, 0, 0));
+    //rot_ati_ambf.setCol0(cVector3d(0, 1, 0));
+    //rot_ati_ambf.setCol1(cVector3d(0, 0, 1));
+    //rot_ati_ambf.setCol2(cVector3d(-1, 0, 0));
+    rot_ati_ambf.setCol0(cVector3d(1, 0, 0));
+    rot_ati_ambf.setCol1(cVector3d(0, -1, 0));
+    rot_ati_ambf.setCol2(cVector3d(0, 0, 1));
     return 1;
 }
 
@@ -118,45 +121,72 @@ void GalenControlPlugin::graphicsUpdate() {
     cColorf color_z;
     color_z.setBlue();
     // change arrow length according to measured force magnitude
-    // vector<double> measured_cf = galenInterface->get_measured_cf();
-    // double a_length_x = measured_cf[0];
-    // double a_length_y = measured_cf[1];
-    // double a_length_z = measured_cf[2];
-    double a_length_x = 0.3;
-    double a_length_y = 0.3;
-    double a_length_z = 0.3;
+    vector<double> measured_cf = galenInterface->get_measured_cf();
+
+    double a_length_x = 0;
+    double a_length_y = 0;
+    double a_length_z = 0;
+
+    if (measured_cf.size() != 0) {
+        a_length_x = measured_cf[0];
+        a_length_y = measured_cf[1];
+        a_length_z = measured_cf[2];
+    }
+
     // map from force magnitude to length, now we clamp the length between 0.1 to 1.0
+    double a_length_x_sim, a_length_y_sim, a_length_z_sim;
+    a_length_x_sim = map_general(a_length_x, 20, -20, 1.0, -1.0);
+    a_length_y_sim = map_general(a_length_y, 20, -20, 1.0, -1.0);
+    a_length_z_sim = map_general(a_length_z, 20, -20, 1.0, -1.0);
 
     // TODO: change color based on its magnitude, increase redness
 
-
     // update z
-    cCreateArrow(arrow_ATI_nano_z, a_length_z, 0.01, 0.1, 0.03,
-                 false, 32, cVector3d(0,0,1), cVector3d(0,0,0), color_z);
-    arrow_ATI_nano_z->setLocalRot(ATI->getLocalRot() * rot_ati_ambf);
+    std::cerr << "len z" << a_length_z_sim << std::endl;
+    cCreateArrow(arrow_ATI_nano_z, std::abs(a_length_z_sim)+0.1, 0.01, 0.05, 0.015,
+                 false, 32, cVector3d(0, 1, 0), cVector3d(0,0,0), color_z);
+    if (a_length_z_sim > 0) {
+        arrow_ATI_nano_z->setLocalRot(ATI->getLocalRot());
+    } else {
+        arrow_ATI_nano_z->setLocalRot(ATI->getLocalRot() * rot_ati_ambf);
+    }
     arrow_ATI_nano_z->setLocalPos(ATI->getLocalPos() + offset);
+
 
     // update y
     arrow_ATI_nano_y->clear();
     cColorf color_y;
     color_y.setRed();
-    cCreateArrow(arrow_ATI_nano_y, a_length_y, 0.01, 0.1, 0.03,
-                 false, 32, cVector3d(0,1,0), cVector3d(0,0,0), color_y);
-    arrow_ATI_nano_y->setLocalTransform(ATI->getLocalRot() * rot_ati_ambf);
+    cCreateArrow(arrow_ATI_nano_y, std::abs(a_length_y_sim)+0.1, 0.01, 0.05, 0.015,
+                 false, 32, cVector3d(0,0,1), cVector3d(0,0,0), color_y);
+    if (a_length_y_sim > 0) {
+        arrow_ATI_nano_y->setLocalRot(ATI->getLocalRot());
+    } else {
+        cMatrix3d rot;
+        rot.setCol0(cVector3d(1, 0, 0));
+        rot.setCol1(cVector3d(0, 1, 0));
+        rot.setCol2(cVector3d(0, 0, -1));
+        arrow_ATI_nano_y->setLocalRot(ATI->getLocalRot() * rot);
+    }
     arrow_ATI_nano_y->setLocalPos(ATI->getLocalPos() + offset);
 
     // update x
     arrow_ATI_nano_x->clear();
     cColorf color_x;
     color_x.setYellow();
-    cCreateArrow(arrow_ATI_nano_x, a_length_x, 0.01, 0.1, 0.03,
+    cCreateArrow(arrow_ATI_nano_x, std::abs(a_length_x_sim)+0.1, 0.01, 0.05, 0.015,
                  false, 32, cVector3d(1,0,0), cVector3d(0,0,0), color_x);
-    arrow_ATI_nano_x->setLocalTransform(ATI->getLocalRot() * rot_ati_ambf);
+    if (a_length_x_sim < 0) {
+        arrow_ATI_nano_x->setLocalRot(ATI->getLocalRot());
+    } else {
+        cMatrix3d rot;
+        rot.setCol0(cVector3d(-1, 0, 0));
+        rot.setCol1(cVector3d(0, 1, 0));
+        rot.setCol2(cVector3d(0, 0, 1));
+        arrow_ATI_nano_x->setLocalRot(ATI->getLocalRot() * rot);
+    }
     arrow_ATI_nano_x->setLocalPos(ATI->getLocalPos() + offset);
 
-    int i = 1;
-
-    // afJointAttributes
 }
 
 void GalenControlPlugin::physicsUpdate(double dt){
@@ -193,7 +223,17 @@ void GalenControlPlugin::physicsUpdate(double dt){
              */
 
             // get mesasured joint states from real world robot via ros
-            // vector<double> measured_jp = galenInterface->get_measured_jp();
+            vector<double> measured_jp = galenInterface->get_measured_jp();
+
+            if (measured_jp.size() != 0) {
+                // physical-sim: 1->3, 2->1, 3->2
+                for (int idx = 0 ; idx < numJoints ; idx++){
+                    double cmd = map_general(measured_jp[idx], physical_joint_limits_upper[idx], physical_joint_limits_lower[idx],
+                                             joints[idx]->getUpperLimit(), joints[idx]->getLowerLimit());
+                    joints[idx]->commandPosition(cmd);
+                }
+            }
+
             // vector<double> measured_tra_jv = galenInterface->get_measured_tra_jv();
             // vector<double> measured_rot_jv = galenInterface->get_measured_rot_jv();
 

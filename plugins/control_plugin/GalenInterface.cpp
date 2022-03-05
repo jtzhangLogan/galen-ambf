@@ -23,6 +23,9 @@ GalenInterface::GalenInterface() {
     // TMP solutions: use /rems/measured_js from Python node
     sub_measured_jp = ros_node->subscribe("/rems/robot_state", 1, &GalenInterface::_measured_jp_CB, this);
 
+    // force sensor subscriber
+    sub_measured_cf = ros_node->subscribe("/rems/measured_cf", 1, &GalenInterface::_measured_cf_CB, this);
+
     // TODO: add callback, fix namespace
     // sub_tf_patient2world = ros_node->subscribe("/Fake_Galen_JS_Publisher", 1, &GalenInterface::_measured_jp_CB, this); // get transformation from patient to the OR coordinate frame
     // sub_tf_patient2robot = ros_node->subscribe("/Fake_Galen_JS_Publisher", 1, &GalenInterface::_measured_jp_CB, this); // get transformation from patient to robot (registration result)
@@ -80,7 +83,8 @@ void GalenInterface::_measured_jp_CB(plugin_msgs::RobotStateConstPtr msg) {
 /*
  * ideally, this should receive data from five joints
  */
-    measured_jp = msg->joint_position;
+    vector<double> pos = {msg->joint_position[1], msg->joint_position[2], msg->joint_position[0], msg->joint_position[3], msg->joint_position[4]};
+    measured_jp = pos;
     measured_jv = msg->joint_velocity;
     //std::cerr << measured_jp[0] << std::endl;
 }
@@ -134,13 +138,8 @@ void GalenInterface::_servo_jp(vector<double> joints) {
 }
 
 void GalenInterface::_measured_cf_CB(geometry_msgs::WrenchStampedConstPtr msg) {
-    measured_cf.push_back(msg->wrench.force.x);
-    measured_cf.push_back(msg->wrench.force.y);
-    measured_cf.push_back(msg->wrench.force.z);
-
-    measured_cf.push_back(msg->wrench.torque.x);
-    measured_cf.push_back(msg->wrench.torque.y);
-    measured_cf.push_back(msg->wrench.torque.z);
+    vector<double> cf = {msg->wrench.force.x, msg->wrench.force.y, msg->wrench.force.z};
+    measured_cf = cf;
 }
 
 void GalenInterface::_measured_tra_jv_CB(geometry_msgs::Vector3ConstPtr msg) {
