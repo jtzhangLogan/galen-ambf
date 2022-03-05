@@ -1,7 +1,0 @@
-/home/ciis/Galen_Simulation_AMBF/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-/home/ciis/Galen_Simulation_AMBF/cmake-build-debug/CMakeFiles/edit_cache.dir
-/home/ciis/Galen_Simulation_AMBF/cmake-build-debug/plugins/CMakeFiles/rebuild_cache.dir
-/home/ciis/Galen_Simulation_AMBF/cmake-build-debug/plugins/CMakeFiles/edit_cache.dir
-/home/ciis/Galen_Simulation_AMBF/cmake-build-debug/plugins/control_plugin/CMakeFiles/edit_cache.dir
-/home/ciis/Galen_Simulation_AMBF/cmake-build-debug/plugins/control_plugin/CMakeFiles/rebuild_cache.dir
-/home/ciis/Galen_Simulation_AMBF/cmake-build-debug/plugins/control_plugin/CMakeFiles/GalenControlPlugin.dir
