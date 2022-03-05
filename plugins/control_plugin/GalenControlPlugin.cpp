@@ -62,7 +62,9 @@ int GalenControlPlugin::init(const afModelPtr a_modelPtr, afModelAttribsPtr a_at
     rot.setExtrinsicEulerRotationDeg(0, -90, 0, C_EULER_ORDER_XYZ);
     // ----------------T_TipOffset.setLocalRot(rot);
 
+    // -----------------------------------------------
     // initialize joint pointers
+    // -----------------------------------------------
     joints.push_back(m_modelPtr->getJoint("carriage1_joint"));
     joints.push_back(m_modelPtr->getJoint("carriage2_joint"));
     joints.push_back(m_modelPtr->getJoint("carriage3_joint"));
@@ -73,14 +75,30 @@ int GalenControlPlugin::init(const afModelPtr a_modelPtr, afModelAttribsPtr a_at
 
     std::cerr << numJoints << std::endl ;
 
+    // -----------------------------------------------
     // initialize force vector and add to world plane
+    // -----------------------------------------------
     arrow_ATI_nano_x = new cMesh();
     arrow_ATI_nano_y = new cMesh();
     arrow_ATI_nano_z = new cMesh();
 
-    cCreateArrow(arrow_ATI_nano_x);
-    cCreateArrow(arrow_ATI_nano_y);
-    cCreateArrow(arrow_ATI_nano_z);
+    cCreateArrow(arrow_ATI_nano_x, 1, 0.01, 0.05, 0.015,
+                 false, 32, cVector3d(1,0,0), cVector3d(0,0,0));
+
+    cCreateArrow(arrow_ATI_nano_y,  1, 0.01, 0.05, 0.015,
+                 false, 32, cVector3d(0,0,1), cVector3d(0,0,0));
+
+    cCreateArrow(arrow_ATI_nano_z, 1, 0.01, 0.05, 0.015,
+                 false, 32, cVector3d(0, 1, 0), cVector3d(0,0,0));
+
+    // change color
+    cColorf color_x, color_y, color_z;
+    color_x.setBlue();
+    color_y.setGreen();
+    color_z.setRed();
+    arrow_ATI_nano_x->m_material->setColor(color_x);
+    arrow_ATI_nano_y->m_material->setColor(color_y);
+    arrow_ATI_nano_z->m_material->setColor(color_z);
 
     m_modelPtr->getWorldPtr()->addSceneObjectToWorld(arrow_ATI_nano_x);
     m_modelPtr->getWorldPtr()->addSceneObjectToWorld(arrow_ATI_nano_y);
@@ -89,9 +107,6 @@ int GalenControlPlugin::init(const afModelPtr a_modelPtr, afModelAttribsPtr a_at
     // find ATI sensor body
     ATI = m_modelPtr->getRigidBody("Tilt Distal Linkage and Force Sensor");
 
-    //rot_ati_ambf.setCol0(cVector3d(0, 1, 0));
-    //rot_ati_ambf.setCol1(cVector3d(0, 0, 1));
-    //rot_ati_ambf.setCol2(cVector3d(-1, 0, 0));
     rot_ati_ambf.setCol0(cVector3d(1, 0, 0));
     rot_ati_ambf.setCol1(cVector3d(0, -1, 0));
     rot_ati_ambf.setCol2(cVector3d(0, 0, 1));
@@ -142,9 +157,7 @@ void GalenControlPlugin::graphicsUpdate() {
     // TODO: change color based on its magnitude, increase redness
 
     // update z
-    std::cerr << "len z" << a_length_z_sim << std::endl;
-    cCreateArrow(arrow_ATI_nano_z, std::abs(a_length_z_sim)+0.1, 0.01, 0.05, 0.015,
-                 false, 32, cVector3d(0, 1, 0), cVector3d(0,0,0), color_z);
+    arrow_ATI_nano_z->scaleXYZ(1, std::abs(a_length_z_sim)+0.1, 1);
     if (a_length_z_sim > 0) {
         arrow_ATI_nano_z->setLocalRot(ATI->getLocalRot());
     } else {
@@ -154,11 +167,7 @@ void GalenControlPlugin::graphicsUpdate() {
 
 
     // update y
-    arrow_ATI_nano_y->clear();
-    cColorf color_y;
-    color_y.setRed();
-    cCreateArrow(arrow_ATI_nano_y, std::abs(a_length_y_sim)+0.1, 0.01, 0.05, 0.015,
-                 false, 32, cVector3d(0,0,1), cVector3d(0,0,0), color_y);
+    arrow_ATI_nano_y->scaleXYZ(1, 1, std::abs(a_length_y_sim)+0.1);
     if (a_length_y_sim > 0) {
         arrow_ATI_nano_y->setLocalRot(ATI->getLocalRot());
     } else {
@@ -171,11 +180,7 @@ void GalenControlPlugin::graphicsUpdate() {
     arrow_ATI_nano_y->setLocalPos(ATI->getLocalPos() + offset);
 
     // update x
-    arrow_ATI_nano_x->clear();
-    cColorf color_x;
-    color_x.setYellow();
-    cCreateArrow(arrow_ATI_nano_x, std::abs(a_length_x_sim)+0.1, 0.01, 0.05, 0.015,
-                 false, 32, cVector3d(1,0,0), cVector3d(0,0,0), color_x);
+    arrow_ATI_nano_x->scaleXYZ(std::abs(a_length_x_sim)+0.1, 1, 1);
     if (a_length_x_sim < 0) {
         arrow_ATI_nano_x->setLocalRot(ATI->getLocalRot());
     } else {
