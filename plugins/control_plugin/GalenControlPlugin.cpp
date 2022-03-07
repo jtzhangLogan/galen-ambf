@@ -65,11 +65,11 @@ int GalenControlPlugin::init(const afModelPtr a_modelPtr, afModelAttribsPtr a_at
     // -----------------------------------------------
     // initialize joint pointers
     // -----------------------------------------------
-    joints.push_back(m_modelPtr->getJoint("carriage1_joint"));
-    joints.push_back(m_modelPtr->getJoint("carriage2_joint"));
-    joints.push_back(m_modelPtr->getJoint("carriage3_joint"));
-    joints.push_back(m_modelPtr->getJoint("roll_joint"));
-    joints.push_back(m_modelPtr->getJoint("tilt_joint"));
+    joints.push_back(m_modelPtr->getJoint("/ambf/env/JOINT carriage1_joint"));
+    joints.push_back(m_modelPtr->getJoint("/ambf/env/JOINT carriage2_joint"));
+    joints.push_back(m_modelPtr->getJoint("/ambf/env/JOINT carriage3_joint"));
+    joints.push_back(m_modelPtr->getJoint("/ambf/env/JOINT roll_joint"));
+    joints.push_back(m_modelPtr->getJoint("/ambf/env/JOINT tilt_joint"));
 
     numJoints = static_cast<int>(joints.size());
 
@@ -107,11 +107,10 @@ int GalenControlPlugin::init(const afModelPtr a_modelPtr, afModelAttribsPtr a_at
     // -----------------------------------------------
     // find ATI and carriage body
     // -----------------------------------------------
-    bodys.push_back(m_modelPtr->getRigidBody("Tilt Distal Linkage and Force Sensor"));
-    bodys.push_back(m_modelPtr->getRigidBody("Carriage1"));
-    bodys.push_back(m_modelPtr->getRigidBody("Carriage2"));
-    bodys.push_back(m_modelPtr->getRigidBody("Carriage3"));
-    std::cerr << bodys.size() << std::endl;
+    bodys.push_back(m_modelPtr->getRigidBody("/ambf/env/BODY Tilt Distal Linkage and Force Sensor"));
+    bodys.push_back(m_modelPtr->getRigidBody("/ambf/env/BODY Carriage1"));
+    bodys.push_back(m_modelPtr->getRigidBody("/ambf/env/BODY Carriage2"));
+    bodys.push_back(m_modelPtr->getRigidBody("/ambf/env/BODY Carriage3"));
 
     rot_ati_ambf.setCol0(cVector3d(1, 0, 0));
     rot_ati_ambf.setCol1(cVector3d(0, -1, 0));
@@ -130,8 +129,22 @@ void GalenControlPlugin::graphicsUpdate() {
     // ------------------------------------------------
     // Update Carriage color
     // ------------------------------------------------
+    for (int i =0; i < bodys.size()-1; i++) {
+        if (!joints.empty()) {
+            // float dis = -(joints[0]->getUpperLimit() - joints[0]->getPosition()) + 0.5;
+            if (abs(joints[i]->getUpperLimit() - joints[i]->getPosition()) < 0.001 or abs(joints[i]->getLowerLimit() - joints[i]->getPosition()) < 0.001) {
+                cColorf limit_warn;
+                limit_warn.setRed();
+                bodys[i + 1]->getVisualObject()->getMesh(0)->m_material->setColor(limit_warn);
+            } else {
+                cColorf orig;
+                orig.set(0.4, 0.4, 0.2835);
+                bodys[i + 1]->getVisualObject()->getMesh(0)->m_material->setColor(orig);
+            }
+        }
+    }
 
-
+    return;
     // ------------------------------------------------
     // Update ATI force arrow
     // ------------------------------------------------
@@ -226,7 +239,7 @@ void GalenControlPlugin::physicsUpdate(double dt){
             /*
              * follow real world robot movement
              */
-
+            return;
             // get mesasured joint states from real world robot via ros
             vector<double> measured_jp = galenInterface->get_measured_jp();
 
