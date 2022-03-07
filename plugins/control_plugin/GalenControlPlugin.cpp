@@ -104,8 +104,14 @@ int GalenControlPlugin::init(const afModelPtr a_modelPtr, afModelAttribsPtr a_at
     m_modelPtr->getWorldPtr()->addSceneObjectToWorld(arrow_ATI_nano_y);
     m_modelPtr->getWorldPtr()->addSceneObjectToWorld(arrow_ATI_nano_z);
 
-    // find ATI sensor body
-    ATI = m_modelPtr->getRigidBody("Tilt Distal Linkage and Force Sensor");
+    // -----------------------------------------------
+    // find ATI and carriage body
+    // -----------------------------------------------
+    bodys.push_back(m_modelPtr->getRigidBody("Tilt Distal Linkage and Force Sensor"));
+    bodys.push_back(m_modelPtr->getRigidBody("Carriage1"));
+    bodys.push_back(m_modelPtr->getRigidBody("Carriage2"));
+    bodys.push_back(m_modelPtr->getRigidBody("Carriage3"));
+    std::cerr << bodys.size() << std::endl;
 
     rot_ati_ambf.setCol0(cVector3d(1, 0, 0));
     rot_ati_ambf.setCol1(cVector3d(0, -1, 0));
@@ -122,19 +128,16 @@ void GalenControlPlugin::graphicsUpdate() {
     }
 
     // ------------------------------------------------
-    // Update ATI force arrow
+    // Update Carriage color
     // ------------------------------------------------
 
+
+    // ------------------------------------------------
+    // Update ATI force arrow
+    // ------------------------------------------------
     // find ATI position, add an offset to the arrow
     auto offset = cVector3d(0.1, 0.1, 0.1);
 
-    /*
-     * update z
-     */
-    arrow_ATI_nano_z->clear();
-    // change color
-    cColorf color_z;
-    color_z.setBlue();
     // change arrow length according to measured force magnitude
     vector<double> measured_cf = galenInterface->get_measured_cf();
 
@@ -154,8 +157,6 @@ void GalenControlPlugin::graphicsUpdate() {
     a_length_y_sim = map_general(a_length_y, 20, -20, 1.0, -1.0);
     a_length_z_sim = map_general(a_length_z, 20, -20, 1.0, -1.0);
 
-    // TODO: change color based on its magnitude, increase redness
-
     // update z
     arrow_ATI_nano_z->scaleXYZ(1, std::abs(a_length_z_sim)+0.1, 1);
     if (a_length_z_sim > 0) {
@@ -164,7 +165,6 @@ void GalenControlPlugin::graphicsUpdate() {
         arrow_ATI_nano_z->setLocalRot(ATI->getLocalRot() * rot_ati_ambf);
     }
     arrow_ATI_nano_z->setLocalPos(ATI->getLocalPos() + offset);
-
 
     // update y
     arrow_ATI_nano_y->scaleXYZ(1, 1, std::abs(a_length_y_sim)+0.1);

@@ -47,6 +47,7 @@ class GalenControlPlugin: public afModelPlugin {
     int numPrismaticJoints = 3;
     int numRevoluteJoints = 2;
     vector<afJointPtr> joints;
+    vector<afRigidBodyPtr> bodys;
     afRigidBodyPtr ATI;
     cMatrix3d rot_ati_ambf;
 
@@ -54,7 +55,7 @@ class GalenControlPlugin: public afModelPlugin {
     cGenericHapticDevicePtr g_hapticDevice;
     cHapticDeviceHandler* g_deviceHandler;
 
-    // TODO: integrate into robot model
+    // Hard-coded joint limit from physical robot
     vector<double> physical_joint_limits_lower = {-233.0, -272.0, -237.0, -1.57, -1.04};
     vector<double> physical_joint_limits_upper = {263.0, 241.0, 254.0, 1.57, 0.96};
 };
