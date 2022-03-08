@@ -16,6 +16,9 @@ GalenInterface::GalenInterface() {
     sub_mobile_cp   = ros_node->subscribe("/Fake_Galen_CP_Publisher", 1, &GalenInterface::_mobile_cp_CB, this);
     sub_tool_cp     = ros_node->subscribe("/Fake_Galen_CP_Publisher", 1, &GalenInterface::_tool_cp_CB, this);
 
+    // registration input: patient to robot
+    sub_registration = ros_node->subscribe("/registration", 1, &GalenInterface::_registration_CB, this);
+
     // Topic name is: /rems/robot_state
     // msg type: REMS/RobotState
     // sub_measured_jp = ros_node->subscribe("/rems/robot_state", 1, &GalenInterface::_measured_jp_CB, this);
@@ -59,6 +62,10 @@ cTransform& GalenInterface::get_tool_cp() {
     return tool_cp;
 }
 
+cTransform& GalenInterface::get_registration() {
+    return registration;
+}
+
 vector<double>& GalenInterface::get_measured_jp() {
     return measured_jp;
 }
@@ -78,6 +85,29 @@ vector<double>& GalenInterface::get_measured_rot_jv() {
 vector<double>& GalenInterface::get_measured_cf() {
     return measured_cf;
 }
+
+// plugin_msgs::RobotStateConstPtr   sensor_msgs::JointStateConstPtr
+void GalenInterface::_registration_CB(geometry_msgs::TransformStampedConstPtr msg) {
+/*
+ * transformation from the patient to the robot
+ */
+    // set translation part
+    registration.setLocalPos(cVector3d(msg->transform.translation.x,
+                                  msg->transform.translation.y,
+                                  msg->transform.translation.z));
+
+    // set rotation part
+    // rotation received is in quaternion, convert to rotation matrix first
+    cQuaternion rot(msg->transform.rotation.w,
+                    msg->transform.rotation.x,
+                    msg->transform.rotation.y,
+                    msg->transform.rotation.z);
+    cMatrix3d rotM;
+    rot.toRotMat(rotM);
+
+    registration.setLocalRot(rotM);
+}
+
 // plugin_msgs::RobotStateConstPtr   sensor_msgs::JointStateConstPtr
 void GalenInterface::_measured_jp_CB(plugin_msgs::RobotStateConstPtr msg) {
 /*

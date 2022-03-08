@@ -25,6 +25,7 @@ private:
     vector<double> measured_jp;    // measured joint position
     vector<double> measured_jv;    // measured joint velocity
 
+    cTransform     registration;   // patient to robot registration
     cTransform     mobile_cp;      // mobile platform cartesian position
     cTransform     tool_cp;        // tool cartesian position
 
@@ -37,6 +38,7 @@ private:
     ros::Subscriber sub_measured_jp;
     ros::Subscriber sub_mobile_cp;
     ros::Subscriber sub_tool_cp;
+    ros::Subscriber sub_registration;
 
     ros::Subscriber sub_measured_tra_jv;
     ros::Subscriber sub_measured_rot_jv;
@@ -62,6 +64,8 @@ public:
     void _measured_rot_jv_CB(geometry_msgs::Vector3ConstPtr);
     void _measured_cf_CB(geometry_msgs::WrenchStampedConstPtr);
 
+    void _registration_CB(geometry_msgs::TransformStampedConstPtr);
+
     // publisher functions
     void _servo_jp(vector<double> joints);
 
@@ -73,6 +77,7 @@ public:
     vector<double>& get_measured_cf();
     cTransform&     get_mobile_cp();
     cTransform&     get_tool_cp();
+    cTransform&     get_registration();
 
     // publisher message
     sensor_msgs::JointState msg_servo_jp;
