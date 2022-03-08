@@ -175,7 +175,7 @@ int GalenControlPlugin::ballTesterInit(afWorldPtr m_worldPtr){
     testerBall->m_material->setShininess(0);
     testerBall->m_material->m_specular.set(0, 0, 0);
     testerBall->setShowEnabled(true);
-    testerBall->setLocalPos( cVector3d(0.0,0.0,0.0) );
+    testerBall->setLocalPos( cVector3d(0.0,0.0,-1.0) );
     m_worldPtr->addSceneObjectToWorld(testerBall);
     
     /*Initialize A Text Pannel To Display Distance Between Tip And Ball*/
@@ -199,10 +199,10 @@ int GalenControlPlugin::ballTesterInit(afWorldPtr m_worldPtr){
 }
 
 ///
-/// \brief This method calculates  the euclidean distance between the tester ball and the tool tip
+/// \brief This method calculates  the euclidean distance between the tester ball suface and the tool tip
 /// \return the distance between the tester ball's surface and the tool tip 
 ///TODO: This  is now refering the Endoscopic tool tip on the galen robot instead of the actual drill. Needs to be changed after drill integration
-cVector3d GalenControlPlugin::getDistanceFromTipToBall(){
+cVector3d GalenControlPlugin::getDistanceFromBallToTip(){
     //Check if testerBall is in use
     if(! ballTesterEnabled){
         cerr<<"ERROR: getDistanceFromTipToBall: Ball Tester is NOT enabled."<<endl;
@@ -216,7 +216,10 @@ cVector3d GalenControlPlugin::getDistanceFromTipToBall(){
     //Get tool tip location
     cVector3d burrPos = m_burrMesh->getLocalPos();
     //Return distance
-    cVector3d dist = (ballLocation-burrPos);
+    cVector3d dist = (burrPos-ballLocation);
+    //Scale to distance
+    double length = dist.length();
+    dist = dist/length*(length-testerBall->getRadius());
     return dist;
 }
 
@@ -225,7 +228,7 @@ cVector3d GalenControlPlugin::getDistanceFromTipToBall(){
 /// \return void
 void GalenControlPlugin::ballTesterServiceRoutine(){
     //Get distance from tip to tester Ball
-    cVector3d dist = getDistanceFromTipToBall();
+    cVector3d dist = getDistanceFromBallToTip();
     //Change display text
     if(ballTesetrDistanceText){
         ballTesetrDistanceText->setText("Distance Vec to Ball:  \n"+ dist.str()+" mm");

@@ -82,7 +82,7 @@ class GalenControlPlugin: public afModelPlugin {
     cLabel* ballTesetrDistanceText;
     //      functions:
     int ballTesterInit(afWorldPtr m_worldPtr);                          //Init function for the ballTester
-    cVector3d getDistanceFromTipToBall();                                      //Distance calculating function for ball tester
+    cVector3d getDistanceFromBallToTip();                                      //Distance calculating function for ball tester
     void ballTesterServiceRoutine();                                               //Physics Update service Routine of ball tester
 
 };
