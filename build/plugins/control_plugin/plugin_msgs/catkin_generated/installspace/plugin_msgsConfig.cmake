@@ -67,8 +67,8 @@ set(plugin_msgs_CONFIG_INCLUDED TRUE)
 
 # set variables for source/devel/install prefixes
 if("FALSE" STREQUAL "TRUE")
-  set(plugin_msgs_SOURCE_PREFIX /home/hongyifan/Galen_AMBF_Simulation/plugins/control_plugin/plugin_msgs)
-  set(plugin_msgs_DEVEL_PREFIX /home/hongyifan/Galen_AMBF_Simulation/build/devel)
+  set(plugin_msgs_SOURCE_PREFIX /home/galen/Mike/Galen_AMBF_Simulation/plugins/control_plugin/plugin_msgs)
+  set(plugin_msgs_DEVEL_PREFIX /home/galen/Mike/Galen_AMBF_Simulation/build/devel)
   set(plugin_msgs_INSTALL_PREFIX "")
   set(plugin_msgs_PREFIX ${plugin_msgs_DEVEL_PREFIX})
 else()
@@ -154,7 +154,7 @@ foreach(library ${libraries})
     set(lib_path "")
     set(lib "${library}-NOTFOUND")
     # since the path where the library is found is returned we have to iterate over the paths manually
-    foreach(path /usr/local/lib;/home/hongyifan/sbr_workspace/devel/lib;/home/hongyifan/ambf/build/devel/lib;/home/hongyifan/rdkdc_workspace/devel/lib;/opt/ros/melodic/lib)
+    foreach(path /usr/local/lib;/opt/ros/noetic/lib)
       find_library(lib ${library}
         PATHS ${path}
         NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
@@ -211,7 +211,7 @@ foreach(depend ${depends})
   _unpack_libraries_with_build_configuration(plugin_msgs_LIBRARIES ${plugin_msgs_LIBRARIES})
 
   _list_append_unique(plugin_msgs_LIBRARY_DIRS ${${plugin_msgs_dep}_LIBRARY_DIRS})
-  list(APPEND plugin_msgs_EXPORTED_TARGETS ${${plugin_msgs_dep}_EXPORTED_TARGETS})
+  _list_append_deduplicate(plugin_msgs_EXPORTED_TARGETS ${${plugin_msgs_dep}_EXPORTED_TARGETS})
 endforeach()
 
 set(pkg_cfg_extras "plugin_msgs-msg-extras.cmake")

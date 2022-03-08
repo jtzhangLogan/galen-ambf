@@ -7,9 +7,9 @@
 # new environment variables
 
 # modified environment variables
-export CMAKE_PREFIX_PATH="/home/hongyifan/Galen_AMBF_Simulation/build/devel:$CMAKE_PREFIX_PATH"
-export LD_LIBRARY_PATH="/home/hongyifan/Galen_AMBF_Simulation/build/devel/lib:$LD_LIBRARY_PATH"
-export PKG_CONFIG_PATH="/home/hongyifan/Galen_AMBF_Simulation/build/devel/lib/pkgconfig:$PKG_CONFIG_PATH"
-export PYTHONPATH="/home/hongyifan/Galen_AMBF_Simulation/build/devel/lib/python2.7/dist-packages:$PYTHONPATH"
-export ROSLISP_PACKAGE_DIRECTORIES="/home/hongyifan/Galen_AMBF_Simulation/build/devel/share/common-lisp:$ROSLISP_PACKAGE_DIRECTORIES"
-export ROS_PACKAGE_PATH="/home/hongyifan/Galen_AMBF_Simulation:$ROS_PACKAGE_PATH"
+export CMAKE_PREFIX_PATH="/home/galen/Mike/Galen_AMBF_Simulation/build/devel:$CMAKE_PREFIX_PATH"
+export LD_LIBRARY_PATH='/home/galen/Mike/Galen_AMBF_Simulation/build/devel/lib:/opt/ros/noetic/lib:/home/galen/catkin_ws/build/cisst/lib'
+export PKG_CONFIG_PATH="/home/galen/Mike/Galen_AMBF_Simulation/build/devel/lib/pkgconfig:$PKG_CONFIG_PATH"
+export PYTHONPATH="/home/galen/Mike/Galen_AMBF_Simulation/build/devel/lib/python3/dist-packages:$PYTHONPATH"
+export ROSLISP_PACKAGE_DIRECTORIES='/home/galen/Mike/Galen_AMBF_Simulation/build/devel/share/common-lisp'
+export ROS_PACKAGE_PATH="/home/galen/Mike/Galen_AMBF_Simulation:$ROS_PACKAGE_PATH"

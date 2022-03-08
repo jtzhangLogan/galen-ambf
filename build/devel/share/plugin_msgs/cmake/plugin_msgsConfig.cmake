@@ -67,8 +67,8 @@ set(plugin_msgs_CONFIG_INCLUDED TRUE)
 
 # set variables for source/devel/install prefixes
 if("TRUE" STREQUAL "TRUE")
-  set(plugin_msgs_SOURCE_PREFIX /home/hongyifan/Galen_AMBF_Simulation/plugins/control_plugin/plugin_msgs)
-  set(plugin_msgs_DEVEL_PREFIX /home/hongyifan/Galen_AMBF_Simulation/build/devel)
+  set(plugin_msgs_SOURCE_PREFIX /home/galen/Mike/Galen_AMBF_Simulation/plugins/control_plugin/plugin_msgs)
+  set(plugin_msgs_DEVEL_PREFIX /home/galen/Mike/Galen_AMBF_Simulation/build/devel)
   set(plugin_msgs_INSTALL_PREFIX "")
   set(plugin_msgs_PREFIX ${plugin_msgs_DEVEL_PREFIX})
 else()
@@ -91,9 +91,9 @@ endif()
 # flag project as catkin-based to distinguish if a find_package()-ed project is a catkin project
 set(plugin_msgs_FOUND_CATKIN_PROJECT TRUE)
 
-if(NOT "/home/hongyifan/Galen_AMBF_Simulation/build/devel/include " STREQUAL " ")
+if(NOT "/home/galen/Mike/Galen_AMBF_Simulation/build/devel/include " STREQUAL " ")
   set(plugin_msgs_INCLUDE_DIRS "")
-  set(_include_dirs "/home/hongyifan/Galen_AMBF_Simulation/build/devel/include")
+  set(_include_dirs "/home/galen/Mike/Galen_AMBF_Simulation/build/devel/include")
   if(NOT " " STREQUAL " ")
     set(_report "Check the issue tracker '' and consider creating a ticket if the problem has not been reported yet.")
   elseif(NOT " " STREQUAL " ")
@@ -110,7 +110,7 @@ if(NOT "/home/hongyifan/Galen_AMBF_Simulation/build/devel/include " STREQUAL " "
         message(FATAL_ERROR "Project 'plugin_msgs' specifies '${idir}' as an include dir, which is not found.  It does not exist in '${include}'.  ${_report}")
       endif()
     else()
-      message(FATAL_ERROR "Project 'plugin_msgs' specifies '${idir}' as an include dir, which is not found.  It does neither exist as an absolute directory nor in '/home/hongyifan/Galen_AMBF_Simulation/plugins/control_plugin/plugin_msgs/${idir}'.  ${_report}")
+      message(FATAL_ERROR "Project 'plugin_msgs' specifies '${idir}' as an include dir, which is not found.  It does neither exist as an absolute directory nor in '/home/galen/Mike/Galen_AMBF_Simulation/plugins/control_plugin/plugin_msgs/${idir}'.  ${_report}")
     endif()
     _list_append_unique(plugin_msgs_INCLUDE_DIRS ${include})
   endforeach()
@@ -154,7 +154,7 @@ foreach(library ${libraries})
     set(lib_path "")
     set(lib "${library}-NOTFOUND")
     # since the path where the library is found is returned we have to iterate over the paths manually
-    foreach(path /home/hongyifan/Galen_AMBF_Simulation/build/devel/lib;/home/hongyifan/sbr_workspace/devel/lib;/home/hongyifan/ambf/build/devel/lib;/home/hongyifan/rdkdc_workspace/devel/lib;/opt/ros/melodic/lib)
+    foreach(path /home/galen/Mike/Galen_AMBF_Simulation/build/devel/lib;/opt/ros/noetic/lib)
       find_library(lib ${library}
         PATHS ${path}
         NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
@@ -211,7 +211,7 @@ foreach(depend ${depends})
   _unpack_libraries_with_build_configuration(plugin_msgs_LIBRARIES ${plugin_msgs_LIBRARIES})
 
   _list_append_unique(plugin_msgs_LIBRARY_DIRS ${${plugin_msgs_dep}_LIBRARY_DIRS})
-  list(APPEND plugin_msgs_EXPORTED_TARGETS ${${plugin_msgs_dep}_EXPORTED_TARGETS})
+  _list_append_deduplicate(plugin_msgs_EXPORTED_TARGETS ${${plugin_msgs_dep}_EXPORTED_TARGETS})
 endforeach()
 
 set(pkg_cfg_extras "plugin_msgs-msg-extras.cmake")
