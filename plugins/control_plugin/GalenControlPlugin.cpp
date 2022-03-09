@@ -21,7 +21,16 @@ int GalenControlPlugin::init(const afModelPtr a_modelPtr, afModelAttribsPtr a_at
      * naive initialization ignoring input device
      */
 
+    /*Get World Pointer*/
     m_modelPtr = a_modelPtr;
+    m_worldPtr = m_modelPtr->getWorldPtr();     //Ptr to the simulation world
+
+    /*Get Main Camera*/
+    m_mainCamera = m_worldPtr->getCameras()[0];
+    if(!m_mainCamera){
+        m_mainCamera = m_modelPtr->getCameras()[0];
+    }
+
 
     galenInterface = new GalenInterface();
 
@@ -30,6 +39,11 @@ int GalenControlPlugin::init(const afModelPtr a_modelPtr, afModelAttribsPtr a_at
     // TODO: switch back to Galen mode
     // controlMode = ControlMode::GALEN_CONTROL;
     controlMode = ControlMode::GALEN_CONTROL;
+
+    /*===============================================HongYi Fan ================================================*/
+    controlMode = ControlMode::NO_CONTROL;
+     /*==========================================END HongYi Fan ================================================*/
+
 
     // Initialize Input Device
     /*
@@ -89,7 +103,137 @@ int GalenControlPlugin::init(const afModelPtr a_modelPtr, afModelAttribsPtr a_at
 
     // ATI = m_modelPtr->getJoint("Tilt Distal Linkage and Force Sensor-Endoscope 35 degree in REMS");
 
+
+    /*================================HongYi Fan=====================================*/
+    /* Volumetric Drilling Init*/
+    volumetricDrillingInit(m_worldPtr);
+
+    /*ballTesterInit*/
+    ballTesterInit(m_worldPtr);
+
+    /*============================End HongYi Fan=====================================*/
     return 1;
+}
+
+///
+/// \brief This method initializes necessary components of volumetric drilling function
+/// \param m_worldPtr    A world that contains all objects of the virtual environment
+/// \return 1 if successful, 0 otherwise.
+///
+int GalenControlPlugin::volumetricDrillingInit(afWorldPtr m_worldPtr){
+
+    //Color of voxels
+    m_zeroColor = cColorb(0x00, 0x00, 0x00, 0x00);
+    m_boneColor = cColorb(255, 249, 219, 255);
+    m_storedColor = cColorb(0x00, 0x00, 0x00, 0x00);
+
+    //Setup drill model and voxel object
+    /*Find drill in world map*/
+    m_drillRigidBody = m_worldPtr->getRigidBody("Endoscope Tip");  //TODO: this is refering to the endoscopic tip, need to be changed back to drill model
+    if (!m_drillRigidBody){
+        /*If not in world, try finding it in Model map*/
+        m_drillRigidBody = m_modelPtr->getRigidBody("Endoscope Tip"); 
+        /*Exit if fail to find it*/
+        if (!m_drillRigidBody){
+            cerr << "ERROR! FAILED TO FIND DRILL RIGID BODY NAMED " << "Endoscope Tip" << endl;
+            exit(EXIT_FAILURE);
+        }
+    }
+    m_burrMesh = new cShapeSphere(0.043); // 2mm by default with 1 AMBF unit = 0.049664 m
+    m_burrMesh->setRadius(0.043);
+    m_burrMesh->m_material->setBlack();
+    m_burrMesh->m_material->setShininess(0);
+    m_burrMesh->m_material->m_specular.set(0, 0, 0);
+    m_burrMesh->setShowEnabled(true);
+    m_drillRigidBody->addChildSceneObject(m_burrMesh, cTransform());
+    m_worldPtr->addSceneObjectToWorld(m_burrMesh);
+    
+
+    m_volumeObject = m_worldPtr->getVolume("mastoidectomy_volume");
+    if (!m_volumeObject){
+        cerr << "ERROR! FAILED TO FIND DRILL VOLUME NAMED " << "mastoidectomy_volume" << endl;
+        return -1;
+    }
+    else{
+        m_voxelObj = m_volumeObject->getInternalVolume();
+    }
+
+}
+
+///
+/// \brief This method initializes necessary components of ball tester for force feedback 
+/// \param m_worldPtr    A world that contains all objects of the virtual environment
+/// \return 1 if successful, 0 otherwise.
+///
+int GalenControlPlugin::ballTesterInit(afWorldPtr m_worldPtr){
+    /*Mark ballTester enabled flag*/
+    ballTesterEnabled = true;
+    /*Initialize tester ball*/
+    testerBall = new cShapeSphere(0.1);
+    testerBall->setRadius(0.1);
+    testerBall->m_material->setRed();
+    testerBall->m_material->setShininess(0);
+    testerBall->m_material->m_specular.set(0, 0, 0);
+    testerBall->setShowEnabled(true);
+    testerBall->setLocalPos( cVector3d(0.0,0.0,-1.0) );
+    m_worldPtr->addSceneObjectToWorld(testerBall);
+    
+    /*Initialize A Text Pannel To Display Distance Between Tip And Ball*/
+    // A panel to display current drill size
+    cFontPtr font = NEW_CFONTCALIBRI40();
+    ballTesterDistancePanel = new cPanel();
+    ballTesterDistancePanel->setSize(170, 50);
+    ballTesterDistancePanel->setCornerRadius(10, 10, 10, 10);
+    ballTesterDistancePanel->setLocalPos(40,60);
+    ballTesterDistancePanel->setColor(cColorf(1, 1, 1));
+    ballTesterDistancePanel->setTransparencyLevel(0.8);
+    m_mainCamera->getFrontLayer()->addChild(ballTesterDistancePanel);
+    ballTesetrDistanceText = new cLabel(font);
+    ballTesetrDistanceText->setLocalPos(50,70);
+    ballTesetrDistanceText->m_fontColor.setBlack();
+    ballTesetrDistanceText->setFontScale(.5);
+    ballTesetrDistanceText->setText("Distance to Tester Ball:  x mm");
+    m_mainCamera->getFrontLayer()->addChild(ballTesetrDistanceText);
+
+    return 1;
+}
+
+///
+/// \brief This method calculates  the euclidean distance between the tester ball suface and the tool tip
+/// \return the distance between the tester ball's surface and the tool tip 
+///TODO: This  is now refering the Endoscopic tool tip on the galen robot instead of the actual drill. Needs to be changed after drill integration
+cVector3d GalenControlPlugin::getDistanceFromBallToTip(){
+    //Check if testerBall is in use
+    if(! ballTesterEnabled){
+        cerr<<"ERROR: getDistanceFromTipToBall: Ball Tester is NOT enabled."<<endl;
+        return 0;
+    }
+
+    //Get ball's location
+    cVector3d ballLocation = testerBall->getLocalPos();
+    //Get ball's radius
+    double r = testerBall->getRadius();
+    //Get tool tip location
+    cVector3d burrPos = m_burrMesh->getLocalPos();
+    //Return distance
+    cVector3d dist = (burrPos-ballLocation);
+    //Scale to distance
+    double length = dist.length();
+    dist = dist/length*(length-testerBall->getRadius());
+    return dist;
+}
+
+///
+/// \brief This method contains the service routine for the ball tester function. This method should be invoked in physics update
+/// \return void
+void GalenControlPlugin::ballTesterServiceRoutine(){
+    //Get distance from tip to tester Ball
+    cVector3d dist = getDistanceFromBallToTip();
+    //Change display text
+    if(ballTesetrDistanceText){
+        ballTesetrDistanceText->setText("Distance Vec to Ball:  \n"+ dist.str()+" mm");
+    }
+    
 }
 
 int start_counter = 0;
@@ -218,6 +362,9 @@ void GalenControlPlugin::physicsUpdate(double dt){
             break;
 
         default:
+            ballTesterServiceRoutine();
+
+
             break;
     }
 
