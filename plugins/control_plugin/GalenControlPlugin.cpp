@@ -85,11 +85,11 @@ int GalenControlPlugin::init(const afModelPtr a_modelPtr, afModelAttribsPtr a_at
     cCreateArrow(arrow_ATI_nano_x, 1, 0.01, 0.05, 0.015,
                  false, 32, cVector3d(1,0,0), cVector3d(0,0,0));
 
-    cCreateArrow(arrow_ATI_nano_y,  1, 0.01, 0.05, 0.015,
+    cCreateArrow(arrow_ATI_nano_y, 1, 0.01, 0.05, 0.015,
                  false, 32, cVector3d(0,0,1), cVector3d(0,0,0));
 
     cCreateArrow(arrow_ATI_nano_z, 1, 0.01, 0.05, 0.015,
-                 false, 32, cVector3d(0, 1, 0), cVector3d(0,0,0));
+                 false, 32, cVector3d(0,1,0), cVector3d(0,0,0));
 
     // change color
     cColorf color_x, color_y, color_z;
@@ -144,12 +144,11 @@ void GalenControlPlugin::graphicsUpdate() {
         }
     }
 
-    return;
     // ------------------------------------------------
     // Update ATI force arrow
     // ------------------------------------------------
     // find ATI position, add an offset to the arrow
-    auto offset = cVector3d(0.1, 0.1, 0.1);
+    auto offset = cVector3d(0.5, 0.1, 0.2);
 
     // change arrow length according to measured force magnitude
     vector<double> measured_cf = galenInterface->get_measured_cf();
@@ -171,39 +170,49 @@ void GalenControlPlugin::graphicsUpdate() {
     a_length_z_sim = map_general(a_length_z, 20, -20, 1.0, -1.0);
 
     // update z
-    arrow_ATI_nano_z->scaleXYZ(1, std::abs(a_length_z_sim)+0.1, 1);
+    arrow_ATI_nano_z->clear();
+    cCreateArrow(arrow_ATI_nano_z, std::abs(a_length_z_sim)+0.1, 0.01, 0.05, 0.015,
+                 false, 32, cVector3d(0,1,0), cVector3d(0,0,0));
     if (a_length_z_sim > 0) {
-        arrow_ATI_nano_z->setLocalRot(ATI->getLocalRot());
+        arrow_ATI_nano_z->setLocalRot(bodys[0]->getLocalRot());
     } else {
-        arrow_ATI_nano_z->setLocalRot(ATI->getLocalRot() * rot_ati_ambf);
+        cMatrix3d rot;
+        rot.setCol0(cVector3d(1, 0, 0));
+        rot.setCol1(cVector3d(0, -1, 0));
+        rot.setCol2(cVector3d(0, 0, 1));
+        arrow_ATI_nano_z->setLocalRot(bodys[0]->getLocalRot() * rot);
     }
-    arrow_ATI_nano_z->setLocalPos(ATI->getLocalPos() + offset);
+    arrow_ATI_nano_z->setLocalPos(bodys[0]->getLocalPos() + offset);
 
     // update y
-    arrow_ATI_nano_y->scaleXYZ(1, 1, std::abs(a_length_y_sim)+0.1);
+    arrow_ATI_nano_y->clear();
+    cCreateArrow(arrow_ATI_nano_y, std::abs(a_length_y_sim)+0.1, 0.01, 0.05, 0.015,
+                 false, 32, cVector3d(0,0,1), cVector3d(0,0,0));
     if (a_length_y_sim > 0) {
-        arrow_ATI_nano_y->setLocalRot(ATI->getLocalRot());
+        arrow_ATI_nano_y->setLocalRot(bodys[0]->getLocalRot());
     } else {
         cMatrix3d rot;
         rot.setCol0(cVector3d(1, 0, 0));
         rot.setCol1(cVector3d(0, 1, 0));
         rot.setCol2(cVector3d(0, 0, -1));
-        arrow_ATI_nano_y->setLocalRot(ATI->getLocalRot() * rot);
+        arrow_ATI_nano_y->setLocalRot(bodys[0]->getLocalRot() * rot);
     }
-    arrow_ATI_nano_y->setLocalPos(ATI->getLocalPos() + offset);
+    arrow_ATI_nano_y->setLocalPos(bodys[0]->getLocalPos() + offset);
 
     // update x
-    arrow_ATI_nano_x->scaleXYZ(std::abs(a_length_x_sim)+0.1, 1, 1);
+    arrow_ATI_nano_x->clear();
+    cCreateArrow(arrow_ATI_nano_x, std::abs(a_length_x_sim)+0.1, 0.01, 0.05, 0.015,
+                 false, 32, cVector3d(1,0,0), cVector3d(0,0,0));
     if (a_length_x_sim < 0) {
-        arrow_ATI_nano_x->setLocalRot(ATI->getLocalRot());
+        arrow_ATI_nano_x->setLocalRot(bodys[0]->getLocalRot());
     } else {
         cMatrix3d rot;
         rot.setCol0(cVector3d(-1, 0, 0));
         rot.setCol1(cVector3d(0, 1, 0));
         rot.setCol2(cVector3d(0, 0, 1));
-        arrow_ATI_nano_x->setLocalRot(ATI->getLocalRot() * rot);
+        arrow_ATI_nano_x->setLocalRot(bodys[0]->getLocalRot() * rot);
     }
-    arrow_ATI_nano_x->setLocalPos(ATI->getLocalPos() + offset);
+    arrow_ATI_nano_x->setLocalPos(bodys[0]->getLocalPos() + offset);
 
 }
 
@@ -239,7 +248,7 @@ void GalenControlPlugin::physicsUpdate(double dt){
             /*
              * follow real world robot movement
              */
-            return;
+
             // get mesasured joint states from real world robot via ros
             vector<double> measured_jp = galenInterface->get_measured_jp();
 
