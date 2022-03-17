@@ -9,14 +9,14 @@ namespace: /ambf/env/
 
 BODY mastoidectomy_drill:
   name: mastoidectomy_drill
-  mesh: drillMesh.obj
+  mesh: full_drill_and_adapter.STL
   mass: 0.0
   inertia:
     ix: 0.0
     iy: 0.0
     iz: 0.0
   collision margin: 0.001
-  scale: 0.1 # this is probably not the right scale now, need to double check?
+  scale: 0.001 # this is probably not the right scale now, need to double check?
   location:
     position:
       x: 0.5

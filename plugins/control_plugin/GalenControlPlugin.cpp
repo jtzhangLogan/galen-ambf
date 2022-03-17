@@ -129,18 +129,18 @@ int GalenControlPlugin::volumetricDrillingInit(afWorldPtr m_worldPtr){
 
     //Setup drill model and voxel object
     /*Find drill in world map*/
-    m_drillRigidBody = m_worldPtr->getRigidBody("Endoscope Tip");  //TODO: this is refering to the endoscopic tip, need to be changed back to drill model
+    m_drillRigidBody = m_worldPtr->getRigidBody("drill_tip");  //TODO: this is refering to the endoscopic tip, need to be changed back to drill model
     if (!m_drillRigidBody){
         /*If not in world, try finding it in Model map*/
-        m_drillRigidBody = m_modelPtr->getRigidBody("Endoscope Tip"); 
+        m_drillRigidBody = m_modelPtr->getRigidBody("drill_tip"); 
         /*Exit if fail to find it*/
         if (!m_drillRigidBody){
-            cerr << "ERROR! FAILED TO FIND DRILL RIGID BODY NAMED " << "Endoscope Tip" << endl;
+            cerr << "ERROR! FAILED TO FIND DRILL RIGID BODY NAMED " << "mastoidectomy_drill" << endl;
             exit(EXIT_FAILURE);
         }
     }
     m_burrMesh = new cShapeSphere(0.043); // 2mm by default with 1 AMBF unit = 0.049664 m
-    m_burrMesh->setRadius(0.043);
+    m_burrMesh->setRadius(0.00001);
     m_burrMesh->m_material->setBlack();
     m_burrMesh->m_material->setShininess(0);
     m_burrMesh->m_material->m_specular.set(0, 0, 0);
@@ -148,15 +148,21 @@ int GalenControlPlugin::volumetricDrillingInit(afWorldPtr m_worldPtr){
     m_drillRigidBody->addChildSceneObject(m_burrMesh, cTransform());
     m_worldPtr->addSceneObjectToWorld(m_burrMesh);
     
-
-    m_volumeObject = m_worldPtr->getVolume("mastoidectomy_volume");
-    if (!m_volumeObject){
-        cerr << "ERROR! FAILED TO FIND DRILL VOLUME NAMED " << "mastoidectomy_volume" << endl;
-        return -1;
+    /*Get reference for volxel objetc*/
+    while(!m_volumeObject){
+        m_volumeObject = m_modelPtr->getVolume("mastoidectomy_volume_low");
+        if(!m_volumeObject){
+            m_volumeObject = m_worldPtr->getVolume("mastoidectomy_volume_low");
+        }
+        if (!m_volumeObject){
+            cerr << "ERROR! FAILED TO FIND DRILL VOLUME NAMED " << "mastoidectomy_volume_low" << endl;
+            return -1;
+        }
+        else{
+            m_voxelObj = m_volumeObject->getInternalVolume();
+        }
     }
-    else{
-        m_voxelObj = m_volumeObject->getInternalVolume();
-    }
+    
 
 }
 
@@ -170,12 +176,16 @@ int GalenControlPlugin::ballTesterInit(afWorldPtr m_worldPtr){
     ballTesterEnabled = true;
     /*Initialize tester ball*/
     testerBall = new cShapeSphere(0.1);
-    testerBall->setRadius(0.1);
+    testerBall->setRadius(0.05);
     testerBall->m_material->setRed();
     testerBall->m_material->setShininess(0);
     testerBall->m_material->m_specular.set(0, 0, 0);
     testerBall->setShowEnabled(true);
-    testerBall->setLocalPos( cVector3d(0.0,0.0,-1.0) );
+    /*Set location of ball to center of mass of bone volume*/
+    cMatrix3d voxelObjRot = m_voxelObj -> getLocalRot();
+    cVector3d voxelObjPos = m_volumeObject->getLocalPos();
+    cVector3d volumeCenterofMass = voxelObjRot* ((m_voxelObj->m_minCorner + m_voxelObj->m_maxCorner)/2) + voxelObjPos;
+    testerBall->setLocalPos( volumeCenterofMass);
     m_worldPtr->addSceneObjectToWorld(testerBall);
     
     /*Initialize A Text Pannel To Display Distance Between Tip And Ball*/
@@ -228,7 +238,7 @@ cVector3d GalenControlPlugin::getDistanceFromBallToTip(){
 /// \return void
 void GalenControlPlugin::ballTesterServiceRoutine(){
     //Get distance from tip to tester Ball
-    cVector3d dist = getDistanceFromBallToTip();
+    cVector3d dist = 1000*getDistanceFromBallToTip();
     //Change display text
     if(ballTesetrDistanceText){
         ballTesetrDistanceText->setText("Distance Vec to Ball:  \n"+ dist.str()+" mm");
@@ -362,11 +372,12 @@ void GalenControlPlugin::physicsUpdate(double dt){
             break;
 
         default:
-            ballTesterServiceRoutine();
-
 
             break;
     }
+
+    /*Service Routines Methods*/
+    ballTesterServiceRoutine();
 
 }
 
