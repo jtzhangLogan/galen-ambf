@@ -1,4 +1,4 @@
-# Install script for directory: /home/galen/Mike/Galen_AMBF_Simulation/plugins
+# Install script for directory: /home/hongyifan/Galen_AMBF_Simulation/plugins
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -37,8 +37,13 @@ if(NOT DEFINED CMAKE_CROSSCOMPILING)
   set(CMAKE_CROSSCOMPILING "FALSE")
 endif()
 
+# Set default install directory permissions.
+if(NOT DEFINED CMAKE_OBJDUMP)
+  set(CMAKE_OBJDUMP "/usr/bin/objdump")
+endif()
+
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/galen/Mike/Galen_AMBF_Simulation/build/plugins/control_plugin/cmake_install.cmake")
+  include("/home/hongyifan/Galen_AMBF_Simulation/build/plugins/control_plugin/cmake_install.cmake")
 endif()
 

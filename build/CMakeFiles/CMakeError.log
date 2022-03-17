@@ -1,27 +1,31 @@
 Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
-Change Dir: /home/galen/Mike/Galen_AMBF_Simulation/build/CMakeFiles/CMakeTmp
+Change Dir: /home/hongyifan/Galen_AMBF_Simulation/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/make cmTC_82745/fast && /usr/bin/make -f CMakeFiles/cmTC_82745.dir/build.make CMakeFiles/cmTC_82745.dir/build
-make[1]: Entering directory '/home/galen/Mike/Galen_AMBF_Simulation/build/CMakeFiles/CMakeTmp'
-Building C object CMakeFiles/cmTC_82745.dir/src.c.o
-/usr/bin/cc   -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_82745.dir/src.c.o   -c /home/galen/Mike/Galen_AMBF_Simulation/build/CMakeFiles/CMakeTmp/src.c
-Linking C executable cmTC_82745
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_82745.dir/link.txt --verbose=1
-/usr/bin/cc  -DCMAKE_HAVE_LIBC_PTHREAD    -rdynamic CMakeFiles/cmTC_82745.dir/src.c.o  -o cmTC_82745 
-/usr/bin/ld: CMakeFiles/cmTC_82745.dir/src.c.o: in function `main':
-src.c:(.text+0x46): undefined reference to `pthread_create'
-/usr/bin/ld: src.c:(.text+0x52): undefined reference to `pthread_detach'
-/usr/bin/ld: src.c:(.text+0x63): undefined reference to `pthread_join'
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_1186f/fast && /usr/bin/make  -f CMakeFiles/cmTC_1186f.dir/build.make CMakeFiles/cmTC_1186f.dir/build
+make[1]: 进入目录“/home/hongyifan/Galen_AMBF_Simulation/build/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_1186f.dir/src.c.o
+/usr/bin/cc -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_1186f.dir/src.c.o -c /home/hongyifan/Galen_AMBF_Simulation/build/CMakeFiles/CMakeTmp/src.c
+Linking C executable cmTC_1186f
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_1186f.dir/link.txt --verbose=1
+/usr/bin/cc -rdynamic CMakeFiles/cmTC_1186f.dir/src.c.o -o cmTC_1186f 
+CMakeFiles/cmTC_1186f.dir/src.c.o：在函数‘main’中：
+src.c:(.text+0x3e)：对‘pthread_create’未定义的引用
+src.c:(.text+0x4a)：对‘pthread_detach’未定义的引用
+src.c:(.text+0x56)：对‘pthread_cancel’未定义的引用
+src.c:(.text+0x67)：对‘pthread_join’未定义的引用
+src.c:(.text+0x7b)：对‘pthread_atfork’未定义的引用
 collect2: error: ld returned 1 exit status
-make[1]: *** [CMakeFiles/cmTC_82745.dir/build.make:87: cmTC_82745] Error 1
-make[1]: Leaving directory '/home/galen/Mike/Galen_AMBF_Simulation/build/CMakeFiles/CMakeTmp'
-make: *** [Makefile:121: cmTC_82745/fast] Error 2
+CMakeFiles/cmTC_1186f.dir/build.make:98: recipe for target 'cmTC_1186f' failed
+make[1]: *** [cmTC_1186f] Error 1
+make[1]: 离开目录“/home/hongyifan/Galen_AMBF_Simulation/build/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_1186f/fast' failed
+make: *** [cmTC_1186f/fast] Error 2
 
 
 Source file was:
 #include <pthread.h>
 
-void* test_func(void* data)
+static void* test_func(void* data)
 {
   return data;
 }
@@ -31,6 +35,7 @@ int main(void)
   pthread_t thread;
   pthread_create(&thread, NULL, test_func, NULL);
   pthread_detach(thread);
+  pthread_cancel(thread);
   pthread_join(thread, NULL);
   pthread_atfork(NULL, NULL, NULL);
   pthread_exit(NULL);
@@ -39,20 +44,22 @@ int main(void)
 }
 
 Determining if the function pthread_create exists in the pthreads failed with the following output:
-Change Dir: /home/galen/Mike/Galen_AMBF_Simulation/build/CMakeFiles/CMakeTmp
+Change Dir: /home/hongyifan/Galen_AMBF_Simulation/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/make cmTC_a8349/fast && /usr/bin/make -f CMakeFiles/cmTC_a8349.dir/build.make CMakeFiles/cmTC_a8349.dir/build
-make[1]: Entering directory '/home/galen/Mike/Galen_AMBF_Simulation/build/CMakeFiles/CMakeTmp'
-Building C object CMakeFiles/cmTC_a8349.dir/CheckFunctionExists.c.o
-/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_a8349.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
-Linking C executable cmTC_a8349
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_a8349.dir/link.txt --verbose=1
-/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_a8349.dir/CheckFunctionExists.c.o  -o cmTC_a8349  -lpthreads 
-/usr/bin/ld: cannot find -lpthreads
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_2b66b/fast && /usr/bin/make  -f CMakeFiles/cmTC_2b66b.dir/build.make CMakeFiles/cmTC_2b66b.dir/build
+make[1]: 进入目录“/home/hongyifan/Galen_AMBF_Simulation/build/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_2b66b.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create -o CMakeFiles/cmTC_2b66b.dir/CheckFunctionExists.c.o -c /usr/share/cmake-3.23/Modules/CheckFunctionExists.c
+Linking C executable cmTC_2b66b
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_2b66b.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create -rdynamic CMakeFiles/cmTC_2b66b.dir/CheckFunctionExists.c.o -o cmTC_2b66b  -lpthreads 
+/usr/bin/ld: 找不到 -lpthreads
 collect2: error: ld returned 1 exit status
-make[1]: *** [CMakeFiles/cmTC_a8349.dir/build.make:87: cmTC_a8349] Error 1
-make[1]: Leaving directory '/home/galen/Mike/Galen_AMBF_Simulation/build/CMakeFiles/CMakeTmp'
-make: *** [Makefile:121: cmTC_a8349/fast] Error 2
+CMakeFiles/cmTC_2b66b.dir/build.make:98: recipe for target 'cmTC_2b66b' failed
+make[1]: *** [cmTC_2b66b] Error 1
+make[1]: 离开目录“/home/hongyifan/Galen_AMBF_Simulation/build/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_2b66b/fast' failed
+make: *** [cmTC_2b66b/fast] Error 2
 
 
 

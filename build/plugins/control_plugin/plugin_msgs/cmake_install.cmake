@@ -1,4 +1,4 @@
-# Install script for directory: /home/galen/Mike/Galen_AMBF_Simulation/plugins/control_plugin/plugin_msgs
+# Install script for directory: /home/hongyifan/Galen_AMBF_Simulation/plugins/control_plugin/plugin_msgs
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -37,6 +37,11 @@ if(NOT DEFINED CMAKE_CROSSCOMPILING)
   set(CMAKE_CROSSCOMPILING "FALSE")
 endif()
 
+# Set default install directory permissions.
+if(NOT DEFINED CMAKE_OBJDUMP)
+  set(CMAKE_OBJDUMP "/usr/bin/objdump")
+endif()
+
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
   
       if (NOT EXISTS "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}")
@@ -56,7 +61,7 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-file(INSTALL DESTINATION "/usr/local" TYPE PROGRAM FILES "/home/galen/Mike/Galen_AMBF_Simulation/build/plugins/control_plugin/plugin_msgs/catkin_generated/installspace/_setup_util.py")
+  file(INSTALL DESTINATION "/usr/local" TYPE PROGRAM FILES "/home/hongyifan/Galen_AMBF_Simulation/build/plugins/control_plugin/plugin_msgs/catkin_generated/installspace/_setup_util.py")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
@@ -68,7 +73,7 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-file(INSTALL DESTINATION "/usr/local" TYPE PROGRAM FILES "/home/galen/Mike/Galen_AMBF_Simulation/build/catkin_generated/installspace/env.sh")
+  file(INSTALL DESTINATION "/usr/local" TYPE PROGRAM FILES "/home/hongyifan/Galen_AMBF_Simulation/build/catkin_generated/installspace/env.sh")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
@@ -80,9 +85,9 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-file(INSTALL DESTINATION "/usr/local" TYPE FILE FILES
-    "/home/galen/Mike/Galen_AMBF_Simulation/build/catkin_generated/installspace/setup.bash"
-    "/home/galen/Mike/Galen_AMBF_Simulation/build/catkin_generated/installspace/local_setup.bash"
+  file(INSTALL DESTINATION "/usr/local" TYPE FILE FILES
+    "/home/hongyifan/Galen_AMBF_Simulation/build/catkin_generated/installspace/setup.bash"
+    "/home/hongyifan/Galen_AMBF_Simulation/build/catkin_generated/installspace/local_setup.bash"
     )
 endif()
 
@@ -95,9 +100,9 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-file(INSTALL DESTINATION "/usr/local" TYPE FILE FILES
-    "/home/galen/Mike/Galen_AMBF_Simulation/build/catkin_generated/installspace/setup.sh"
-    "/home/galen/Mike/Galen_AMBF_Simulation/build/catkin_generated/installspace/local_setup.sh"
+  file(INSTALL DESTINATION "/usr/local" TYPE FILE FILES
+    "/home/hongyifan/Galen_AMBF_Simulation/build/catkin_generated/installspace/setup.sh"
+    "/home/hongyifan/Galen_AMBF_Simulation/build/catkin_generated/installspace/local_setup.sh"
     )
 endif()
 
@@ -110,9 +115,9 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-file(INSTALL DESTINATION "/usr/local" TYPE FILE FILES
-    "/home/galen/Mike/Galen_AMBF_Simulation/build/catkin_generated/installspace/setup.zsh"
-    "/home/galen/Mike/Galen_AMBF_Simulation/build/catkin_generated/installspace/local_setup.zsh"
+  file(INSTALL DESTINATION "/usr/local" TYPE FILE FILES
+    "/home/hongyifan/Galen_AMBF_Simulation/build/catkin_generated/installspace/setup.zsh"
+    "/home/hongyifan/Galen_AMBF_Simulation/build/catkin_generated/installspace/local_setup.zsh"
     )
 endif()
 
@@ -125,63 +130,63 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-file(INSTALL DESTINATION "/usr/local" TYPE FILE FILES "/home/galen/Mike/Galen_AMBF_Simulation/build/catkin_generated/installspace/.rosinstall")
+  file(INSTALL DESTINATION "/usr/local" TYPE FILE FILES "/home/hongyifan/Galen_AMBF_Simulation/build/catkin_generated/installspace/.rosinstall")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/plugin_msgs/msg" TYPE FILE FILES "/home/galen/Mike/Galen_AMBF_Simulation/plugins/control_plugin/plugin_msgs/msg/RobotState.msg")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/plugin_msgs/msg" TYPE FILE FILES "/home/hongyifan/Galen_AMBF_Simulation/plugins/control_plugin/plugin_msgs/msg/RobotState.msg")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/plugin_msgs/cmake" TYPE FILE FILES "/home/galen/Mike/Galen_AMBF_Simulation/build/plugins/control_plugin/plugin_msgs/catkin_generated/installspace/plugin_msgs-msg-paths.cmake")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/plugin_msgs/cmake" TYPE FILE FILES "/home/hongyifan/Galen_AMBF_Simulation/build/plugins/control_plugin/plugin_msgs/catkin_generated/installspace/plugin_msgs-msg-paths.cmake")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/include" TYPE DIRECTORY FILES "/home/galen/Mike/Galen_AMBF_Simulation/build/devel/include/plugin_msgs")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/include" TYPE DIRECTORY FILES "/home/hongyifan/Galen_AMBF_Simulation/build/devel/include/plugin_msgs")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/roseus/ros" TYPE DIRECTORY FILES "/home/galen/Mike/Galen_AMBF_Simulation/build/devel/share/roseus/ros/plugin_msgs")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/roseus/ros" TYPE DIRECTORY FILES "/home/hongyifan/Galen_AMBF_Simulation/build/devel/share/roseus/ros/plugin_msgs")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/common-lisp/ros" TYPE DIRECTORY FILES "/home/galen/Mike/Galen_AMBF_Simulation/build/devel/share/common-lisp/ros/plugin_msgs")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/common-lisp/ros" TYPE DIRECTORY FILES "/home/hongyifan/Galen_AMBF_Simulation/build/devel/share/common-lisp/ros/plugin_msgs")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/gennodejs/ros" TYPE DIRECTORY FILES "/home/galen/Mike/Galen_AMBF_Simulation/build/devel/share/gennodejs/ros/plugin_msgs")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/gennodejs/ros" TYPE DIRECTORY FILES "/home/hongyifan/Galen_AMBF_Simulation/build/devel/share/gennodejs/ros/plugin_msgs")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  execute_process(COMMAND "/usr/bin/python3" -m compileall "/home/galen/Mike/Galen_AMBF_Simulation/build/devel/lib/python3/dist-packages/plugin_msgs")
+  execute_process(COMMAND "/usr/bin/python2" -m compileall "/home/hongyifan/Galen_AMBF_Simulation/build/devel/lib/python2.7/dist-packages/plugin_msgs")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/python3/dist-packages" TYPE DIRECTORY FILES "/home/galen/Mike/Galen_AMBF_Simulation/build/devel/lib/python3/dist-packages/plugin_msgs")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/python2.7/dist-packages" TYPE DIRECTORY FILES "/home/hongyifan/Galen_AMBF_Simulation/build/devel/lib/python2.7/dist-packages/plugin_msgs")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" TYPE FILE FILES "/home/galen/Mike/Galen_AMBF_Simulation/build/plugins/control_plugin/plugin_msgs/catkin_generated/installspace/plugin_msgs.pc")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" TYPE FILE FILES "/home/hongyifan/Galen_AMBF_Simulation/build/plugins/control_plugin/plugin_msgs/catkin_generated/installspace/plugin_msgs.pc")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/plugin_msgs/cmake" TYPE FILE FILES "/home/galen/Mike/Galen_AMBF_Simulation/build/plugins/control_plugin/plugin_msgs/catkin_generated/installspace/plugin_msgs-msg-extras.cmake")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/plugin_msgs/cmake" TYPE FILE FILES "/home/hongyifan/Galen_AMBF_Simulation/build/plugins/control_plugin/plugin_msgs/catkin_generated/installspace/plugin_msgs-msg-extras.cmake")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
   file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/plugin_msgs/cmake" TYPE FILE FILES
-    "/home/galen/Mike/Galen_AMBF_Simulation/build/plugins/control_plugin/plugin_msgs/catkin_generated/installspace/plugin_msgsConfig.cmake"
-    "/home/galen/Mike/Galen_AMBF_Simulation/build/plugins/control_plugin/plugin_msgs/catkin_generated/installspace/plugin_msgsConfig-version.cmake"
+    "/home/hongyifan/Galen_AMBF_Simulation/build/plugins/control_plugin/plugin_msgs/catkin_generated/installspace/plugin_msgsConfig.cmake"
+    "/home/hongyifan/Galen_AMBF_Simulation/build/plugins/control_plugin/plugin_msgs/catkin_generated/installspace/plugin_msgsConfig-version.cmake"
     )
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/plugin_msgs" TYPE FILE FILES "/home/galen/Mike/Galen_AMBF_Simulation/plugins/control_plugin/plugin_msgs/package.xml")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/plugin_msgs" TYPE FILE FILES "/home/hongyifan/Galen_AMBF_Simulation/plugins/control_plugin/plugin_msgs/package.xml")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("/home/galen/Mike/Galen_AMBF_Simulation/build/gtest/cmake_install.cmake")
+  include("/home/hongyifan/Galen_AMBF_Simulation/build/gtest/cmake_install.cmake")
 
 endif()
 
