@@ -40,9 +40,6 @@ int GalenControlPlugin::init(const afModelPtr a_modelPtr, afModelAttribsPtr a_at
     // controlMode = ControlMode::GALEN_CONTROL;
     controlMode = ControlMode::GALEN_CONTROL;
 
-    /*===============================================HongYi Fan ================================================*/
-    controlMode = ControlMode::NO_CONTROL;
-     /*==========================================END HongYi Fan ================================================*/
 
 
     // Initialize Input Device
@@ -132,7 +129,7 @@ int GalenControlPlugin::volumetricDrillingInit(afWorldPtr m_worldPtr){
     m_drillRigidBody = m_worldPtr->getRigidBody("drill_tip");  //TODO: this is refering to the endoscopic tip, need to be changed back to drill model
     if (!m_drillRigidBody){
         /*If not in world, try finding it in Model map*/
-        m_drillRigidBody = m_modelPtr->getRigidBody("drill_tip"); 
+        m_drillRigidBody = m_modelPtr->getRigidBody("drill_tip");
         /*Exit if fail to find it*/
         if (!m_drillRigidBody){
             cerr << "ERROR! FAILED TO FIND DRILL RIGID BODY NAMED " << "mastoidectomy_drill" << endl;
@@ -147,7 +144,7 @@ int GalenControlPlugin::volumetricDrillingInit(afWorldPtr m_worldPtr){
     m_burrMesh->setShowEnabled(true);
     m_drillRigidBody->addChildSceneObject(m_burrMesh, cTransform());
     m_worldPtr->addSceneObjectToWorld(m_burrMesh);
-    
+
     /*Get reference for volxel objetc*/
     while(!m_volumeObject){
         m_volumeObject = m_modelPtr->getVolume("mastoidectomy_volume_low");
@@ -162,12 +159,12 @@ int GalenControlPlugin::volumetricDrillingInit(afWorldPtr m_worldPtr){
             m_voxelObj = m_volumeObject->getInternalVolume();
         }
     }
-    
+
 
 }
 
 ///
-/// \brief This method initializes necessary components of ball tester for force feedback 
+/// \brief This method initializes necessary components of ball tester for force feedback
 /// \param m_worldPtr    A world that contains all objects of the virtual environment
 /// \return 1 if successful, 0 otherwise.
 ///
@@ -187,7 +184,7 @@ int GalenControlPlugin::ballTesterInit(afWorldPtr m_worldPtr){
     cVector3d volumeCenterofMass = voxelObjRot* ((m_voxelObj->m_minCorner + m_voxelObj->m_maxCorner)/2) + voxelObjPos;
     testerBall->setLocalPos( volumeCenterofMass);
     m_worldPtr->addSceneObjectToWorld(testerBall);
-    
+
     /*Initialize A Text Pannel To Display Distance Between Tip And Ball*/
     // A panel to display current drill size
     cFontPtr font = NEW_CFONTCALIBRI40();
@@ -210,7 +207,7 @@ int GalenControlPlugin::ballTesterInit(afWorldPtr m_worldPtr){
 
 ///
 /// \brief This method calculates  the euclidean distance between the tester ball suface and the tool tip
-/// \return the distance between the tester ball's surface and the tool tip 
+/// \return the distance between the tester ball's surface and the tool tip
 ///TODO: This  is now refering the Endoscopic tool tip on the galen robot instead of the actual drill. Needs to be changed after drill integration
 cVector3d GalenControlPlugin::getDistanceFromBallToTip(){
     //Check if testerBall is in use
@@ -239,11 +236,13 @@ cVector3d GalenControlPlugin::getDistanceFromBallToTip(){
 void GalenControlPlugin::ballTesterServiceRoutine(){
     //Get distance from tip to tester Ball
     cVector3d dist = 1000*getDistanceFromBallToTip();
+    galenInterface->pub_distance(dist);
+
     //Change display text
     if(ballTesetrDistanceText){
         ballTesetrDistanceText->setText("Distance Vec to Ball:  \n"+ dist.str()+" mm");
     }
-    
+
 }
 
 int start_counter = 0;
@@ -308,14 +307,18 @@ void GalenControlPlugin::physicsUpdate(double dt){
                 std::cerr << commandVelocity << std::endl;
                 joints[idx]->commandVelocity(commandVelocity);
             }*/
-            std::cerr << "position" << std::endl;
-            vector<double> measured_jp = galenInterface->get_measured_jp();
 
-            for (int idx = 0 ; idx < numJoints ; idx++){
-                double initialPos = map_joints(measured_jp[idx], physical_joint_limits_upper[idx], physical_joint_limits_lower[idx],
-                                               joints[idx]->getUpperLimit(), joints[idx]->getLowerLimit());
-                joints[idx]->commandPosition(measured_jp[idx]);
+            vector<double> measured_jp = galenInterface->get_measured_jp();
+            if(!measured_jp.empty()){
+              for (int idx = 0 ; idx < numJoints ; idx++){
+                  double initialPos = map_joints(measured_jp[idx], physical_joint_limits_upper[idx], physical_joint_limits_lower[idx],
+                                                 joints[idx]->getUpperLimit(), joints[idx]->getLowerLimit());
+
+                  //joints[idx]->commandPosition(measured_jp[idx]);
+                  joints[idx]->commandPosition(initialPos);
+              }
             }
+
 
         }
         break;

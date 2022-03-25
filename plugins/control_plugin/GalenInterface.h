@@ -76,6 +76,7 @@ public:
     vector<double>& get_measured_cf();
     cTransform&     get_mobile_cp();
     cTransform&     get_tool_cp();
+    void pub_distance(cVector3d dist);
 
     // publisher message
     sensor_msgs::JointState msg_servo_jp;
