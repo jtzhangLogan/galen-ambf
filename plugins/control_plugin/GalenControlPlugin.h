@@ -8,6 +8,7 @@
 #include "GalenInterface.h"
 #include "GalenInvKin.h"
 #include <afFramework.h>
+#include <algorithm>
 
 using namespace ambf;
 
@@ -78,12 +79,13 @@ class GalenControlPlugin: public afModelPlugin {
     //      Variables:
     bool  ballTesterEnabled = false;
     cShapeSphere* testerBall;
-    cPanel* ballTesterDistancePanel;
+    cPanel* SDF_vectorDistancePanel;
     cLabel* ballTesetrDistanceText;
+    cMesh* SDF_distanceVectorMesh;
     //      functions:
-    int ballTesterInit(afWorldPtr m_worldPtr);                          //Init function for the ballTester
+    int SDF_Init(afWorldPtr m_worldPtr);                          //Init function for the SDF distance functions
     cVector3d getDistanceFromBallToTip();                                      //Distance calculating function for ball tester
-    void ballTesterServiceRoutine();                                               //Physics Update service Routine of ball tester
+    void SDF_ServiceRoutine();                                               //Physics Update service Routine of ball tester
 
 };
 

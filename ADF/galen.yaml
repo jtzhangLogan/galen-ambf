@@ -1192,7 +1192,7 @@ BODY Tilt Proximal Linkage:
 
 BODY mastoidectomy_drill:
   name: mastoidectomy_drill
-  mesh: full_drill_and_adapter.STL
+  mesh: drill_and_adapter_short.STL
   mass: 0.1
   collision margin: 0.001
   scale: 0.001
@@ -2216,9 +2216,9 @@ JOINT Drill-Drill_tip:
     y: 0.0
     z: -0.0
   parent pivot: #This number is large because the drill mesh is scaled from mm to m (by 1000)
-    x: -32.8
-    y: -128.5
-    z: -119.4
+    x: -16.55
+    y: -105.591
+    z: -103.049
   child axis:
     x: 1.0
     y: 0.0

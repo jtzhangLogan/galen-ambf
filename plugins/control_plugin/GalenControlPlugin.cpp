@@ -105,8 +105,8 @@ int GalenControlPlugin::init(const afModelPtr a_modelPtr, afModelAttribsPtr a_at
     /* Volumetric Drilling Init*/
     volumetricDrillingInit(m_worldPtr);
 
-    /*ballTesterInit*/
-    ballTesterInit(m_worldPtr);
+    /*SDF Init*/
+    SDF_Init(m_worldPtr);
 
     /*============================End HongYi Fan=====================================*/
     return 1;
@@ -164,11 +164,11 @@ int GalenControlPlugin::volumetricDrillingInit(afWorldPtr m_worldPtr){
 }
 
 ///
-/// \brief This method initializes necessary components of ball tester for force feedback
+/// \brief This method initializes necessary components of SDF for force feedback
 /// \param m_worldPtr    A world that contains all objects of the virtual environment
 /// \return 1 if successful, 0 otherwise.
 ///
-int GalenControlPlugin::ballTesterInit(afWorldPtr m_worldPtr){
+int GalenControlPlugin::SDF_Init(afWorldPtr m_worldPtr){
     /*Mark ballTester enabled flag*/
     ballTesterEnabled = true;
     /*Initialize tester ball*/
@@ -185,22 +185,27 @@ int GalenControlPlugin::ballTesterInit(afWorldPtr m_worldPtr){
     testerBall->setLocalPos( volumeCenterofMass);
     m_worldPtr->addSceneObjectToWorld(testerBall);
 
-    /*Initialize A Text Pannel To Display Distance Between Tip And Ball*/
+    /*Initialize A Text Pannel To Display SDF Distance Between Tip And closest critical region*/
     // A panel to display current drill size
     cFontPtr font = NEW_CFONTCALIBRI40();
-    ballTesterDistancePanel = new cPanel();
-    ballTesterDistancePanel->setSize(170, 50);
-    ballTesterDistancePanel->setCornerRadius(10, 10, 10, 10);
-    ballTesterDistancePanel->setLocalPos(40,60);
-    ballTesterDistancePanel->setColor(cColorf(1, 1, 1));
-    ballTesterDistancePanel->setTransparencyLevel(0.8);
-    m_mainCamera->getFrontLayer()->addChild(ballTesterDistancePanel);
+    SDF_vectorDistancePanel = new cPanel();
+    SDF_vectorDistancePanel->setSize(170, 50);
+    SDF_vectorDistancePanel->setCornerRadius(10, 10, 10, 10);
+    SDF_vectorDistancePanel->setLocalPos(40,60);
+    SDF_vectorDistancePanel->setColor(cColorf(1, 1, 1));
+    SDF_vectorDistancePanel->setTransparencyLevel(0.8);
+    m_mainCamera->getFrontLayer()->addChild(SDF_vectorDistancePanel);
     ballTesetrDistanceText = new cLabel(font);
     ballTesetrDistanceText->setLocalPos(50,70);
     ballTesetrDistanceText->m_fontColor.setBlack();
     ballTesetrDistanceText->setFontScale(.5);
-    ballTesetrDistanceText->setText("Distance to Tester Ball:  x mm");
+    ballTesetrDistanceText->setText("SDF Distance Vec:  x mm");
     m_mainCamera->getFrontLayer()->addChild(ballTesetrDistanceText);
+
+    /*Initialize an arrow mesh to represent SDF distance vector*/
+    SDF_distanceVectorMesh = new cMesh();
+    SDF_distanceVectorMesh -> m_material ->setColorf( 0,0,1 );
+    m_worldPtr -> addSceneObjectToWorld(SDF_distanceVectorMesh);
 
     return 1;
 }
@@ -233,16 +238,23 @@ cVector3d GalenControlPlugin::getDistanceFromBallToTip(){
 ///
 /// \brief This method contains the service routine for the ball tester function. This method should be invoked in physics update
 /// \return void
-void GalenControlPlugin::ballTesterServiceRoutine(){
+void GalenControlPlugin::SDF_ServiceRoutine(){
     //Get distance from tip to tester Ball
-    cVector3d dist = 1000*getDistanceFromBallToTip();
+    cVector3d dist = getDistanceFromBallToTip();
     galenInterface->pub_distance(dist);
 
     //Change display text
     if(ballTesetrDistanceText){
-        ballTesetrDistanceText->setText("Distance Vec to Ball:  \n"+ dist.str()+" mm");
+        ballTesetrDistanceText->setText("SDF Distance Vec:  \n"+ (1000*dist).str()+" mm");
     }
 
+    //Render an arrow to represent the SDF vector
+    SDF_distanceVectorMesh -> clear();
+    cVector3d arrowStartingPos = testerBall->getLocalPos()+ dist * ( 1/dist.length() * testerBall->getRadius() );
+    double R = min( 1.0 , 20 / (dist.length()*1000) );
+    cColorf arrowColor(  R ,1,0,0.3);
+    cCreateArrow(SDF_distanceVectorMesh, dist.length() ,0.003,0.05,0.006,false,32,dist, arrowStartingPos,arrowColor );
+    SDF_distanceVectorMesh ->m_material->setColorf( R, 1, 0, 0.3);
 }
 
 int start_counter = 0;
@@ -380,7 +392,7 @@ void GalenControlPlugin::physicsUpdate(double dt){
     }
 
     /*Service Routines Methods*/
-    ballTesterServiceRoutine();
+    SDF_ServiceRoutine();
 
 }
 
@@ -407,6 +419,9 @@ void GalenControlPlugin::controlModeCheck(bool btn, double dt){
 bool GalenControlPlugin::close()
 {
     delete galenInterface;
+    delete SDF_distanceVectorMesh;
+    delete SDF_vectorDistancePanel;
+    delete ballTesetrDistanceText;
     return 0;
 }
 
