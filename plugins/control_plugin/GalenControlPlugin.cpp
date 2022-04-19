@@ -126,10 +126,10 @@ int GalenControlPlugin::volumetricDrillingInit(afWorldPtr m_worldPtr){
 
     //Setup drill model and voxel object
     /*Find drill in world map*/
-    m_drillRigidBody = m_worldPtr->getRigidBody("drill_tip");  //TODO: this is refering to the endoscopic tip, need to be changed back to drill model
+    m_drillRigidBody = m_modelPtr->getRigidBody("drill_tip");  
     if (!m_drillRigidBody){
         /*If not in world, try finding it in Model map*/
-        m_drillRigidBody = m_modelPtr->getRigidBody("drill_tip");
+        m_drillRigidBody = m_worldPtr->getRigidBody("drill_tip");
         /*Exit if fail to find it*/
         if (!m_drillRigidBody){
             cerr << "ERROR! FAILED TO FIND DRILL RIGID BODY NAMED " << "mastoidectomy_drill" << endl;
@@ -160,7 +160,35 @@ int GalenControlPlugin::volumetricDrillingInit(afWorldPtr m_worldPtr){
         }
     }
 
+    //Initialize tool cursors
+    toolCursorInit();
 
+    //Initialize Warning panels
+    warningPanelInit();
+
+
+
+}
+
+void GalenControlPlugin::warningPanelInit(){
+    // create a font
+    cFontPtr font = NEW_CFONTCALIBRI40();
+
+    // A warning pop-up that shows up while drilling at critical region
+    m_warningPopup = new cPanel();
+    m_warningPopup->set(m_mainCamera->m_width/2, m_mainCamera->m_height/5);
+    m_warningPopup->setColor(cColorf(0.6,0,0));
+    m_warningPopup->setLocalPos(m_mainCamera->m_width*0.3, m_mainCamera->m_height*0.6, 0);
+    m_mainCamera->getFrontLayer()->addChild(m_warningPopup);
+    m_warningPopup->setShowPanel(false);
+
+    m_warningText = new cLabel(font);
+    m_warningText->setLocalPos(0.31 * m_mainCamera->m_width, 0.67 * m_mainCamera->m_height, 0.5);
+    m_warningText->m_fontColor.setWhite();
+    m_warningText->setFontScale(1.0);
+    m_warningText->setText("WARNING! Critical Region Detected");
+    m_mainCamera->getFrontLayer()->addChild(m_warningText);
+    m_warningText->setShowEnabled(false);
 }
 
 ///
@@ -236,7 +264,7 @@ cVector3d GalenControlPlugin::getDistanceFromBallToTip(){
 }
 
 ///
-/// \brief This method contains the service routine for the ball tester function. This method should be invoked in physics update
+/// \brief This method contains the service routine for the SDF publishing. This method should be invoked in physics update
 /// \return void
 void GalenControlPlugin::SDF_ServiceRoutine(){
     //Get distance from tip to tester Ball
@@ -255,6 +283,116 @@ void GalenControlPlugin::SDF_ServiceRoutine(){
     cColorf arrowColor(  R ,1,0,0.3);
     cCreateArrow(SDF_distanceVectorMesh, dist.length() ,0.003,0.05,0.006,false,32,dist, arrowStartingPos,arrowColor );
     SDF_distanceVectorMesh ->m_material->setColorf( R, 1, 0, 0.3);
+}
+
+///
+/// \brief This method updates the position of the shaft tool cursors which eventually updates the position of the whole tool.
+/// \return void
+void GalenControlPlugin::toolCursorPoseUpdate(cVector3d &pos){
+    m_toolCursorList[0] -> setLocalPos(pos);
+}
+
+
+///
+/// \brief This method contains the service routine for thevolumetric drilling algorithm. This method should be invoked in physics update
+/// \return void
+void GalenControlPlugin::volumetricDrillingServiceRoutine(){
+    //update tool cursor pos
+    cVector3d toolPos = m_burrMesh->getLocalPos();
+    toolCursorPoseUpdate(toolPos);
+
+    //Voxel removing
+    if (m_toolCursorList[0]->isInContact(m_voxelObj)){
+        for (int ci = 0 ; ci < 3 ; ci++){
+            // retrieve contact event
+            cCollisionEvent* contact = m_toolCursorList[0]->m_hapticPoint->getCollisionEvent(ci);
+
+            cVector3d orig(contact->m_voxelIndexX, contact->m_voxelIndexY, contact->m_voxelIndexZ);
+
+            m_voxelObj->m_texture->m_image->getVoxelColor(uint(orig.x()), uint(orig.y()), uint(orig.z()), m_storedColor);
+
+            //if the tool comes in contact with the critical region, instantiate the warning message
+            if(m_storedColor != m_boneColor && m_storedColor != m_zeroColor)
+            {
+                m_warningPopup->setShowPanel(true);
+                m_warningText->setShowEnabled(true);
+            }
+
+            m_voxelObj->m_texture->m_image->setVoxelColor(uint(orig.x()), uint(orig.y()), uint(orig.z()), m_zeroColor);
+
+            //Publisher for voxels removed
+            if(m_storedColor != m_zeroColor)
+            {
+                double sim_time = m_drillRigidBody->getCurrentTimeStamp();
+
+                double voxel_array[3] = {orig.get(0), orig.get(1), orig.get(2)};
+
+                cColorf color_glFloat = m_storedColor.getColorf();
+                float color_array[4];
+                color_array[0] = color_glFloat.getR();
+                color_array[1] = color_glFloat.getG();
+                color_array[2] = color_glFloat.getB();
+                color_array[3] = color_glFloat.getA();
+
+                /*TODO: is drilling pub necessary*/
+                //m_drillingPub -> voxelsRemoved(voxel_array,color_array,sim_time);
+            }
+
+            m_mutexVoxel.acquire();
+            m_volumeUpdate.enclose(cVector3d(uint(orig.x()), uint(orig.y()), uint(orig.z())));
+            m_mutexVoxel.release();
+            // mark voxel for update
+        }
+
+        m_flagMarkVolumeForUpdate = true;
+    }
+    // remove warning panel
+    else
+    {
+        m_warningPopup->setShowPanel(false);
+        m_warningText->setShowEnabled(false);
+    }
+    // compute interaction forces
+    for(int i = 0 ; i < m_toolCursorList.size() ; i++){
+        m_toolCursorList[i]->computeInteractionForces();
+    }
+}
+
+///
+/// \brief This method contains the initialization of tool cursors in the af world
+/// \return void
+void GalenControlPlugin::toolCursorInit(){
+    m_toolCursorList.resize(1);                                 //TODO: currently only one tool cursor, may add more to 8 later
+    for (int i = 0; i < m_toolCursorList.size() ; i++ ){
+        m_toolCursorList[i] = new cToolCursor(m_worldPtr -> getChaiWorld());
+
+        if(i == 0){
+            m_toolCursorList[i] -> setHapticDevice(m_hapticDevice);
+            // map the physical workspace of the haptic device to a larger virtual workspace.
+
+            m_toolCursorList[i]->setWorkspaceRadius(10.0);
+            m_toolCursorList[i]->setWaitForSmallForce(true);
+            m_toolCursorList[i]->start();
+            m_toolCursorList[i]->m_hapticPoint->m_sphereProxy->setShowFrame(false);
+
+            m_toolCursorList[i]->m_name = "mastoidectomy_drill";
+            //This method sets the display options of the goal and proxy spheres. If both spheres are enabled, a small line is drawn between both spheres.
+            // m_toolCursorList[i]->m_hapticPoint->setShow(m_showGoalProxySpheres, m_showGoalProxySpheres); 
+            m_toolCursorList[i]->m_hapticPoint->m_sphereProxy->m_material->setRedCrimson();
+            m_toolCursorList[i]->m_hapticPoint->m_sphereGoal->m_material->setBlueAquamarine();
+        }
+        else{
+            /*
+            m_toolCursorList[i]->setShowContactPoints(m_showGoalProxySpheres, m_showGoalProxySpheres);
+             m_toolCursorList[i]->setRadius(m_toolCursorRadius[i]);
+            */
+            m_toolCursorList[i]->m_hapticPoint->m_sphereProxy->m_material->setGreenChartreuse();
+            m_toolCursorList[i]->m_hapticPoint->m_sphereGoal->m_material->setOrangeCoral();
+           
+        }
+
+    }
+    
 }
 
 int start_counter = 0;

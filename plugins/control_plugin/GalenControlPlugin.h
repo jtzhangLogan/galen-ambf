@@ -71,8 +71,20 @@ class GalenControlPlugin: public afModelPlugin {
     cShapeSphere* m_burrMesh;
     afVolumePtr m_volumeObject;
     cVoxelObject* m_voxelObj;
+    vector<cToolCursor*> m_toolCursorList;                              //List of tool cursors
+    cGenericHapticDevicePtr m_hapticDevice;
+    cPanel* m_warningPopup;                                                          // warning pop-up panel
+    cLabel* m_warningText;
+    cMutex m_mutexVoxel;
+    cCollisionAABBBox m_volumeUpdate;
+    bool m_flagMarkVolumeForUpdate = false;
+
     //      functions:
     int  volumetricDrillingInit(afWorldPtr m_worldPtr);         //Init function for the components of volumetric drilling
+    void volumetricDrillingServiceRoutine();                                //voxel removal algorithm, invoked in every physics update.
+    void toolCursorInit();
+    void toolCursorPoseUpdate(cVector3d & pos);
+    void warningPanelInit();                                                                    //Initialize warning panels
 
 
     /*Ball tester variables/functions declared here*/

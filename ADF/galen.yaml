@@ -25,6 +25,7 @@ bodies:
 - BODY Tilt Distal Linkage and Force Sensor
 - BODY Tilt Middle Linkage
 - BODY Tilt Proximal Linkage
+- BODY dovetail_male
 - BODY mastoidectomy_drill
 - BODY drill_tip
 joints:
@@ -56,7 +57,8 @@ joints:
 - JOINT Leg2_l-Mobile Platform
 - JOINT Leg2_r-Mobile Platform
 - JOINT tilt_joint
-- JOINT Tilt Distal Linkage and Force Sensor-mastoidectomy drill
+- JOINT Tilt Distal Linkage and Force Sensor-dovetail_male
+- JOINT dovetail_male-mastoidectomy drill
 - JOINT Drill-Drill_tip
 
 high resolution path: ./high_res/
@@ -1279,6 +1281,46 @@ BODY drill_tip:
       r: 0.1395
     transparency: 1.0
 
+BODY dovetail_male:
+  name: dovetail_male
+  mesh: dovetail_male.stl
+  mass: 0.1
+  collision margin: 0.001
+  scale: 0.001
+  location:
+    position:
+      x: -0
+      y: -0
+      z: -0
+    orientation:
+      r: 0.0
+      p: 0.0
+      y: 0.0
+  passive: false
+  publish children names: false
+  publish joint names: false
+  publish joint positions: false
+  friction:
+    rolling: 0.1
+    static: 0.5
+  restitution: 0.1
+  damping:
+    angular: 0.1
+    linear: 0.5
+  collision groups: []
+  color components:
+    ambient:
+      level: 1.0
+    diffuse:
+      b: 0.57
+      g: 0.657
+      r: 0.12
+    specular:
+      b: 0.0928
+      g: 0.0928
+      r: 0.1395
+    transparency: 1.0
+
 
 
 
@@ -2172,16 +2214,16 @@ JOINT tilt_joint:
   damping: 200.0
   offset: 1.5708
 
-JOINT Tilt Distal Linkage and Force Sensor-mastoidectomy drill:
-  name: Tilt Distal Linkage and Force Sensor-mastoidectomy drill
+JOINT Tilt Distal Linkage and Force Sensor-dovetail_male:
+  name: Tilt Distal Linkage and Force Sensor-dovetail_male
   parent: BODY Tilt Distal Linkage and Force Sensor
-  child: BODY mastoidectomy_drill
+  child: BODY dovetail_male
   parent axis:
     x: 1.0
     y: 0.0
     z: -0.0
   parent pivot:
-    x: -0.035
+    x: -0.0359
     y: 0.0250
     z: 0.0000
   child axis:
@@ -2206,6 +2248,41 @@ JOINT Tilt Distal Linkage and Force Sensor-mastoidectomy drill:
   max motor impulse: 0.05000000074505806
   damping: 0.0
   offset: -1.5708
+
+JOINT dovetail_male-mastoidectomy drill:
+  name: dovetail_male-mastoidectomy drill
+  parent: BODY dovetail_male
+  child: BODY mastoidectomy_drill
+  parent axis:
+    x: 1.0
+    y: 0.0
+    z: -0.0
+  parent pivot:
+    x: -0.0
+    y: 0.0
+    z: 0.0
+  child axis:
+    x: 1.0
+    y: 0.0
+    z: -0.0
+  child pivot:
+    x: 0.0
+    y: -0.0
+    z: -0.0
+  joint limits:
+    high: 1.2
+    low: -1.2
+  enable feedback: false
+  passive: true
+  controller:
+    P: 0.0
+    I: 0.0
+    D: 0.0
+  detached: true
+  type: fixed
+  max motor impulse: 0.05000000074505806
+  damping: 0.0
+  offset: 0
 
 JOINT Drill-Drill_tip:
   name: Drill-Drill_tip
