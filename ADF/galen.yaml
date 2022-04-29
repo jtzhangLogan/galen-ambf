@@ -1388,7 +1388,7 @@ JOINT carriage1_joint:
   controller:
     P: 11000.0
     I: 110.0
-    D: 110.0
+    D: 510.0
   detached: true
   type: prismatic
   max motor impulse: 1000.0
@@ -1421,7 +1421,7 @@ JOINT carriage2_joint:
   controller:
     P: 11000.0
     I: 110.0
-    D: 110.0
+    D: 510.0
   detached: true
   type: prismatic
   max motor impulse: 1000.0
@@ -1455,7 +1455,7 @@ JOINT carriage3_joint:
   controller:
     P: 11000.0
     I: 110.0
-    D: 110.0
+    D: 510.0
   detached: true
   type: prismatic
   max motor impulse: 1000.0
@@ -1535,7 +1535,7 @@ JOINT Tilt Middle Linkage-Tilt Distal Linkage and Force Sensor:
   parent axis:
     x: 0.0
     y: 0.0
-    z: 1.0
+    z: -1.0
   parent pivot:
     x: 0.155
     y: 0.005
@@ -1543,7 +1543,7 @@ JOINT Tilt Middle Linkage-Tilt Distal Linkage and Force Sensor:
   child axis:
     x: 0.0
     y: -0.0
-    z: -1.0
+    z: 1.0
   child pivot:
     x: -0.0
     y: 0.025
@@ -1552,12 +1552,12 @@ JOINT Tilt Middle Linkage-Tilt Distal Linkage and Force Sensor:
     high: 1.0472
     low: -1.0472
   enable feedback: false
-  passive: true
+  passive: false
   detached: true
   type: revolute
   max motor impulse: 0.05000000074505806
   damping: 0.0
-  offset: -0.063
+  offset: -0.063 
 JOINT Carriage3-Carriage3_lh:
   name: Carriage3-Carriage3_lh
   parent: BODY Carriage3
@@ -2203,7 +2203,7 @@ JOINT tilt_joint:
     high: 0.15
     low: -0.15
   enable feedback: true
-  passive: false
+  passive: true
   controller:
     P: 5000.0
     I: 70.0

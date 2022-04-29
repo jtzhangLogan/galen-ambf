@@ -78,7 +78,8 @@ int GalenControlPlugin::init(const afModelPtr a_modelPtr, afModelAttribsPtr a_at
     joints.push_back(m_modelPtr->getJoint("carriage1_joint"));
     joints.push_back(m_modelPtr->getJoint("carriage2_joint"));
     joints.push_back(m_modelPtr->getJoint("roll_joint"));
-    joints.push_back(m_modelPtr->getJoint("tilt_joint"));
+    //joints.push_back(m_modelPtr->getJoint("tilt_joint"));
+    joints.push_back(m_modelPtr->getJoint("Tilt Middle Linkage-Tilt Distal Linkage and Force Sensor"));
 
     numJoints = static_cast<int>(joints.size());
 
@@ -259,8 +260,11 @@ cVector3d GalenControlPlugin::getDistanceFromBallToTip(){
     cVector3d dist = (burrPos-ballLocation);
     //Scale to distance
     double length = dist.length();
-    dist = dist/length*(length-testerBall->getRadius());
-    return dist;
+    //Check if within ball
+    double mag = length-testerBall->getRadius();
+    mag = max(mag,0.001);
+    dist = dist/length*(mag);
+    return 1000*dist; //units in mm
 }
 
 ///
@@ -273,15 +277,15 @@ void GalenControlPlugin::SDF_ServiceRoutine(){
 
     //Change display text
     if(ballTesetrDistanceText){
-        ballTesetrDistanceText->setText("SDF Distance Vec:  \n"+ (1000*dist).str()+" mm");
+        ballTesetrDistanceText->setText("SDF Distance Vec:  \n"+ (dist).str()+" mm");
     }
 
     //Render an arrow to represent the SDF vector
     SDF_distanceVectorMesh -> clear();
-    cVector3d arrowStartingPos = testerBall->getLocalPos()+ dist * ( 1/dist.length() * testerBall->getRadius() );
-    double R = min( 1.0 , 20 / (dist.length()*1000) );
+    cVector3d arrowStartingPos = testerBall->getLocalPos()+ dist/(dist.length())*testerBall->getRadius();
+    double R = min( 1.0 , 20 / (dist.length()) );
     cColorf arrowColor(  R ,1,0,0.3);
-    cCreateArrow(SDF_distanceVectorMesh, dist.length() ,0.003,0.05,0.006,false,32,dist, arrowStartingPos,arrowColor );
+    cCreateArrow(SDF_distanceVectorMesh, dist.length()/1000 ,0.003,0.05,0.006,false,32,dist, arrowStartingPos,arrowColor );
     SDF_distanceVectorMesh ->m_material->setColorf( R, 1, 0, 0.3);
 }
 
@@ -290,6 +294,7 @@ void GalenControlPlugin::SDF_ServiceRoutine(){
 /// \return void
 void GalenControlPlugin::toolCursorPoseUpdate(cVector3d &pos){
     m_toolCursorList[0] -> setLocalPos(pos);
+
 }
 
 
@@ -297,12 +302,14 @@ void GalenControlPlugin::toolCursorPoseUpdate(cVector3d &pos){
 /// \brief This method contains the service routine for thevolumetric drilling algorithm. This method should be invoked in physics update
 /// \return void
 void GalenControlPlugin::volumetricDrillingServiceRoutine(){
+    m_worldPtr->getChaiWorld()->computeGlobalPositions(true);
     //update tool cursor pos
     cVector3d toolPos = m_burrMesh->getLocalPos();
+    
     toolCursorPoseUpdate(toolPos);
-
     //Voxel removing
     if (m_toolCursorList[0]->isInContact(m_voxelObj)){
+        cout<<"DEBUG 1"<< endl;
         for (int ci = 0 ; ci < 3 ; ci++){
             // retrieve contact event
             cCollisionEvent* contact = m_toolCursorList[0]->m_hapticPoint->getCollisionEvent(ci);
@@ -372,12 +379,12 @@ void GalenControlPlugin::toolCursorInit(){
 
             m_toolCursorList[i]->setWorkspaceRadius(10.0);
             m_toolCursorList[i]->setWaitForSmallForce(true);
-            m_toolCursorList[i]->start();
-            m_toolCursorList[i]->m_hapticPoint->m_sphereProxy->setShowFrame(false);
-
+            cout<< "DEBUG" << m_toolCursorList[i]->start() <<endl;;
+            m_toolCursorList[i]->m_hapticPoint->m_sphereProxy->setShowFrame(true);
+            m_toolCursorList[i]-> setRadius(0.02);
             m_toolCursorList[i]->m_name = "mastoidectomy_drill";
             //This method sets the display options of the goal and proxy spheres. If both spheres are enabled, a small line is drawn between both spheres.
-            // m_toolCursorList[i]->m_hapticPoint->setShow(m_showGoalProxySpheres, m_showGoalProxySpheres); 
+            m_toolCursorList[i]->m_hapticPoint->setShow(true, true); 
             m_toolCursorList[i]->m_hapticPoint->m_sphereProxy->m_material->setRedCrimson();
             m_toolCursorList[i]->m_hapticPoint->m_sphereGoal->m_material->setBlueAquamarine();
         }
@@ -531,6 +538,7 @@ void GalenControlPlugin::physicsUpdate(double dt){
 
     /*Service Routines Methods*/
     SDF_ServiceRoutine();
+    volumetricDrillingServiceRoutine();
 
 }
 
