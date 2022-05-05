@@ -138,7 +138,7 @@ int GalenControlPlugin::volumetricDrillingInit(afWorldPtr m_worldPtr){
         }
     }
     m_burrMesh = new cShapeSphere(0.043); // 2mm by default with 1 AMBF unit = 0.049664 m
-    m_burrMesh->setRadius(0.00001);
+    m_burrMesh->setRadius(0.001);
     m_burrMesh->m_material->setBlack();
     m_burrMesh->m_material->setShininess(0);
     m_burrMesh->m_material->m_specular.set(0, 0, 0);
@@ -372,16 +372,17 @@ void GalenControlPlugin::toolCursorInit(){
     m_toolCursorList.resize(1);                                 //TODO: currently only one tool cursor, may add more to 8 later
     for (int i = 0; i < m_toolCursorList.size() ; i++ ){
         m_toolCursorList[i] = new cToolCursor(m_worldPtr -> getChaiWorld());
+        m_worldPtr->addSceneObjectToWorld(m_toolCursorList[i]);
 
         if(i == 0){
-            m_toolCursorList[i] -> setHapticDevice(m_hapticDevice);
+            //m_toolCursorList[i] -> setHapticDevice(m_hapticDevice);
             // map the physical workspace of the haptic device to a larger virtual workspace.
 
             m_toolCursorList[i]->setWorkspaceRadius(10.0);
-            m_toolCursorList[i]->setWaitForSmallForce(true);
+            //m_toolCursorList[i]->setWaitForSmallForce(true);
             cout<< "DEBUG" << m_toolCursorList[i]->start() <<endl;;
             m_toolCursorList[i]->m_hapticPoint->m_sphereProxy->setShowFrame(true);
-            m_toolCursorList[i]-> setRadius(0.02);
+            m_toolCursorList[i]-> setRadius(0.0043);
             m_toolCursorList[i]->m_name = "mastoidectomy_drill";
             //This method sets the display options of the goal and proxy spheres. If both spheres are enabled, a small line is drawn between both spheres.
             m_toolCursorList[i]->m_hapticPoint->setShow(true, true); 
@@ -398,6 +399,12 @@ void GalenControlPlugin::toolCursorInit(){
            
         }
 
+    }
+
+    cVector3d toolPos = m_burrMesh->getLocalPos();
+    toolCursorPoseUpdate(toolPos);
+    for(int i = 0; i< m_toolCursorList.size(); i++){
+        m_toolCursorList[i] -> initialize();
     }
     
 }
