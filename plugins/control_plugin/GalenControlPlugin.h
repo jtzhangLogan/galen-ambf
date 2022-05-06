@@ -81,7 +81,8 @@ class GalenControlPlugin: public afModelPlugin {
 
     //      functions:
     int  volumetricDrillingInit(afWorldPtr m_worldPtr);         //Init function for the components of volumetric drilling
-    void volumetricDrillingServiceRoutine();                                //voxel removal algorithm, invoked in every physics update.
+    void volumetricDrillingServiceRoutine();                    //voxel removal algorithm, invoked in every physics update.
+    void volumetricDrillingServiceRoutine_Graphics();           //voxel removal algorithm, invoked in every graphics update.
     void toolCursorInit();
     void toolCursorPoseUpdate(cVector3d & pos);
     void warningPanelInit();                                                                    //Initialize warning panels

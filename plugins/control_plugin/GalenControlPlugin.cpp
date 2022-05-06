@@ -10,9 +10,7 @@ cMesh* arrow_ATI_nano_y;
 cMesh* arrow_ATI_nano_z;
 
 double map_joints(double x, double in_max, double in_min, double out_max, double out_min) {
-    //std::cerr << x << "---" << in_max << "---" << in_min << "---" << out_max << "---" << out_min << "---" << std::endl;
     double  result = (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
-    //std::cerr << result << std::endl;
     return result;
 }
 
@@ -34,42 +32,11 @@ int GalenControlPlugin::init(const afModelPtr a_modelPtr, afModelAttribsPtr a_at
 
     galenInterface = new GalenInterface();
 
-    // galenInvKin = new GalenInvKin;
-
-    // TODO: switch back to Galen mode
-    // controlMode = ControlMode::GALEN_CONTROL;
     controlMode = ControlMode::GALEN_CONTROL;
 
-
-
-    // Initialize Input Device
-    /*
-    g_deviceHandler = new cHapticDeviceHandler();
-    if (!g_deviceHandler->getDevice(g_hapticDevice, 0)){
-        return -1;
-    }
-    g_hapticDevice->open();
-    cerr << "FOUND DEVICE " << g_hapticDevice->getSpecifications().m_manufacturerName << ", " << g_hapticDevice->getSpecifications().m_modelName << endl;
-    */
-
-    // TODO: what does this do?
     cMatrix3d rot;
     rot.setExtrinsicEulerRotationDeg(180, 0, 90, C_EULER_ORDER_XYZ);
-    // ----------------T_7_0.setLocalRot(rot);
-    // ----------------T_7_0.setLocalPos(cVector3d(0, 0, -0.3));
 
-    // find base
-    // TODO: whats the purpose? temporarily commented out cause of error
-
-    /*
-    afRigidBodyPtr baseLink = m_modelPtr->getRigidBody("Carriage1");
-    if (!baseLink){
-        cerr << "ERROR! Base link NOT FOUND " << endl;
-        return -1;
-    } */
-    // ----------------T_BaseOffset << baseLink->getCOMTransform();
-
-    // TODO: what does this do?
     rot.setExtrinsicEulerRotationDeg(0, -90, 0, C_EULER_ORDER_XYZ);
     // ----------------T_TipOffset.setLocalRot(rot);
 
@@ -84,32 +51,11 @@ int GalenControlPlugin::init(const afModelPtr a_modelPtr, afModelAttribsPtr a_at
     numJoints = static_cast<int>(joints.size());
 
     std::cerr << "number of joints " << numJoints << std::endl;
-
-    // initialize force vector and add to world plane
-    /*
-    arrow_ATI_nano_x = new cMesh();
-    arrow_ATI_nano_y = new cMesh();
-    arrow_ATI_nano_z = new cMesh();
-
-    cCreateArrow(arrow_ATI_nano_x);
-    cCreateArrow(arrow_ATI_nano_y);
-    cCreateArrow(arrow_ATI_nano_z);
-
-    m_modelPtr->getWorldPtr()->addSceneObjectToWorld(arrow_ATI_nano_x);
-    m_modelPtr->getWorldPtr()->addSceneObjectToWorld(arrow_ATI_nano_y);
-    m_modelPtr->getWorldPtr()->addSceneObjectToWorld(arrow_ATI_nano_z); */
-
-    // ATI = m_modelPtr->getJoint("Tilt Distal Linkage and Force Sensor-Endoscope 35 degree in REMS");
-
-
-    /*================================HongYi Fan=====================================*/
     /* Volumetric Drilling Init*/
     volumetricDrillingInit(m_worldPtr);
 
     /*SDF Init*/
     SDF_Init(m_worldPtr);
-
-    /*============================End HongYi Fan=====================================*/
     return 1;
 }
 
@@ -295,12 +241,6 @@ void GalenControlPlugin::SDF_ServiceRoutine(){
 void GalenControlPlugin::toolCursorPoseUpdate(cVector3d &pos){
     m_toolCursorList[0] -> setLocalPos(pos);
     m_toolCursorList[0] -> setDeviceGlobalPos(pos);
-    cout<< m_toolCursorList[0] -> getGlobalPos() <<endl;
-    cout<< m_toolCursorList[0] -> getLocalPos() <<endl;
-    cout<< m_toolCursorList[0] ->getDeviceLocalPos()  <<endl;
-    cout<< m_toolCursorList[0] ->getDeviceGlobalPos()  <<endl;
-    cout<<endl;
-
 }
 
 
@@ -354,9 +294,9 @@ void GalenControlPlugin::volumetricDrillingServiceRoutine(){
             m_mutexVoxel.acquire();
             m_volumeUpdate.enclose(cVector3d(uint(orig.x()), uint(orig.y()), uint(orig.z())));
             m_mutexVoxel.release();
-            // mark voxel for update
+            
         }
-
+        // mark voxel for update
         m_flagMarkVolumeForUpdate = true;
     }
     // remove warning panel
@@ -368,6 +308,23 @@ void GalenControlPlugin::volumetricDrillingServiceRoutine(){
     // compute interaction forces
     for(int i = 0 ; i < m_toolCursorList.size() ; i++){
         m_toolCursorList[i]->computeInteractionForces();
+    }
+}
+
+///
+/// \brief This method contains the additional service routine for thevolumetric drilling algorithm. This method should be invoked in graphics update
+/// \return void
+void GalenControlPlugin::volumetricDrillingServiceRoutine_Graphics(){
+        // update region of voxels to be updated
+    if (m_flagMarkVolumeForUpdate)
+    {
+        m_mutexVoxel.acquire();
+        cVector3d min = m_volumeUpdate.m_min;
+        cVector3d max = m_volumeUpdate.m_max;
+        m_volumeUpdate.setEmpty();
+        m_mutexVoxel.release();
+        ((cTexture3d*)m_voxelObj->m_texture.get())->markForPartialUpdate(min, max);
+        m_flagMarkVolumeForUpdate = false;
     }
 }
 
@@ -387,11 +344,11 @@ void GalenControlPlugin::toolCursorInit(){
             m_toolCursorList[i]->setWorkspaceRadius(10.0);
             //m_toolCursorList[i]->setWaitForSmallForce(true);
             cout<< "DEBUG" << m_toolCursorList[i]->start() <<endl;;
-            m_toolCursorList[i]->m_hapticPoint->m_sphereProxy->setShowFrame(true);
+            m_toolCursorList[i]->m_hapticPoint->m_sphereProxy->setShowFrame(false);
             m_toolCursorList[i]-> setRadius(0.0043);
             m_toolCursorList[i]->m_name = "mastoidectomy_drill";
             //This method sets the display options of the goal and proxy spheres. If both spheres are enabled, a small line is drawn between both spheres.
-            m_toolCursorList[i]->m_hapticPoint->setShow(true, true); 
+            m_toolCursorList[i]->m_hapticPoint->setShow(false, false); 
             m_toolCursorList[i]->m_hapticPoint->m_sphereProxy->m_material->setRedCrimson();
             m_toolCursorList[i]->m_hapticPoint->m_sphereGoal->m_material->setBlueAquamarine();
         }
@@ -423,10 +380,9 @@ void GalenControlPlugin::graphicsUpdate() {
         start_counter++;
     }
 
-    //std::cerr << ATI->getLocalPos() << std::endl;
-    //std::cerr << ATI->getLocalRot().getRow(0) << std::endl << ATI->getLocalRot().getRow(1) << std::endl << ATI->getLocalRot().getRow(2) << std::endl;
+    //voxel removing
+    volumetricDrillingServiceRoutine_Graphics(); 
 
-    //arrow_ATI_nano_z->setLocalRot(ATI->getLocalRot());
 }
 
 void GalenControlPlugin::physicsUpdate(double dt){
@@ -437,21 +393,6 @@ void GalenControlPlugin::physicsUpdate(double dt){
     if (start_counter < 10){
         return;
     }
-    /*
-    else if (start_counter < counter_toggle){
-        // move to initial position
-        vector<double> measured_jp = galenInterface->get_measured_jp();
-
-        for (int idx = 0 ; idx < numJoints ; idx++){
-            double initialPos = map_joints(measured_jp[idx], physical_joint_limits_upper[idx], physical_joint_limits_lower[idx],
-                                           joints[idx]->getUpperLimit(), joints[idx]->getLowerLimit());
-            joints[idx]->commandPosition(measured_jp[idx]);
-        }
-
-        // TODO: why this part?
-        // m_psmIK.m_FK->computeFK(measured_jp, 4, T_7_0);
-        return;
-    }*/
 
     // update physics based on control mode
     switch (controlMode) {
@@ -460,23 +401,6 @@ void GalenControlPlugin::physicsUpdate(double dt){
             /*
              * follow real world robot movement
              */
-            /*
-            // get mesasured joint states from real world robot via ros
-            vector<double> measured_jv = galenInterface->get_measured_jv();
-
-            // vector<double> measured_tra_jv = galenInterface->get_measured_tra_jv();
-            // vector<double> measured_rot_jv = galenInterface->get_measured_rot_jv();
-
-            // set simulation joint angle
-            // TODO: need to add new logic for commandPosition?
-
-            for (int idx = 0 ; idx < numJoints ; idx++){
-                // move at actual joint velocity
-                double commandVelocity = map_joints(measured_jv[idx], physical_joint_limits_upper[idx], physical_joint_limits_lower[idx],
-                                                    joints[idx]->getUpperLimit(), joints[idx]->getLowerLimit());
-                std::cerr << commandVelocity << std::endl;
-                joints[idx]->commandVelocity(commandVelocity);
-            }*/
 
             vector<double> measured_jp = galenInterface->get_measured_jp();
             if(!measured_jp.empty()){
@@ -499,15 +423,6 @@ void GalenControlPlugin::physicsUpdate(double dt){
              */
             double value = -1.0;
             m_modelPtr->getJoint("tilt_joint")->commandPosition(value);
-
-            // TODO: remove this after testing, just for verifying math equations here
-            //galenInvKin->_compute_inv_kin(galenInterface->get_tool_cp(), galenInterface->get_measured_jp());
-
-            /*
-            for (auto c : galenInterface->get_measured_jp()) {
-                std::cerr << c << std::endl;
-            } */
-
             break;
 
             // get input device commanded position
@@ -523,17 +438,6 @@ void GalenControlPlugin::physicsUpdate(double dt){
                 linVel.set(0, 0, 0);
             }
 
-            // TODO: what does these do?
-            /*
-            cVector3d posCmd = T_7_0.getLocalPos() + cTranspose(T_BaseOffset.getLocalRot()) * linVel * dt;
-            cMatrix3d rotCmd = cTranspose(T_BaseOffset.getLocalRot()) * devPose.getLocalRot() * T_TipOffset.getLocalRot();
-            cTransform T_cmd(posCmd, rotCmd);
-            T_7_0.setLocalPos(posCmd); */
-
-            // computer inverse kinematics
-            // galenInvKin->_compute_inv_kin(galenInterface->get_tool_cp(), galenInterface->get_measured_jp());
-
-            // move simluation robot to desired position using inverse kinematics result
             vector<double> measured_jp = galenInterface->get_measured_jp();
             for (int idx = 0 ; idx < numJoints ; idx++){
                 joints[idx]->commandPosition(measured_jp[idx]);

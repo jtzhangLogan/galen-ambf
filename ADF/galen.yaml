@@ -2294,7 +2294,7 @@ JOINT Drill-Drill_tip:
     z: -0.0
   parent pivot: #This number is large because the drill mesh is scaled from mm to m (by 1000)
     x: -16.55
-    y: -105.591
+    y: -108.591
     z: -103.049
   child axis:
     x: 1.0
