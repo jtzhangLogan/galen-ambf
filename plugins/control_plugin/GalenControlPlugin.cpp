@@ -294,6 +294,12 @@ void GalenControlPlugin::SDF_ServiceRoutine(){
 /// \return void
 void GalenControlPlugin::toolCursorPoseUpdate(cVector3d &pos){
     m_toolCursorList[0] -> setLocalPos(pos);
+    m_toolCursorList[0] -> setDeviceGlobalPos(pos);
+    cout<< m_toolCursorList[0] -> getGlobalPos() <<endl;
+    cout<< m_toolCursorList[0] -> getLocalPos() <<endl;
+    cout<< m_toolCursorList[0] ->getDeviceLocalPos()  <<endl;
+    cout<< m_toolCursorList[0] ->getDeviceGlobalPos()  <<endl;
+    cout<<endl;
 
 }
 
