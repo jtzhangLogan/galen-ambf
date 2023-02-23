@@ -1,1 +1,0 @@
-/usr/bin/c++ -g CMakeFiles/Galen_Simulation_AMBF.dir/main.cpp.o -o Galen_Simulation_AMBF 
