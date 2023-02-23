@@ -65,7 +65,7 @@ ignore inter-collision: true
 namespace: /ambf/env/
 plugins: [
   {
-    path: /home/ciis/Galen_Simulation_AMBF/cmake-build-debug/plugins/control_plugin/,
+    path: ~/Galen_Simulation_AMBF/build/plugins/control_plugin/,
     name: control_plugin,
     filename: libGalenControlPlugin.so
   }
