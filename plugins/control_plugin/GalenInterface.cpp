@@ -35,6 +35,9 @@ GalenInterface::GalenInterface() {
     // initialize publisher
     // TODO: may not be necessary since Galen may not have servo option
     pub_servo_jp = ros_node->advertise<sensor_msgs::JointState>("servo_jp", 1);
+
+    //Publish node of distance from critical region to drill tip
+    pub_CR_distance_vector = ros_node->advertise<geometry_msgs::Vector3>("/rems/sim_distance",10);
 }
 
 GalenInterface::~GalenInterface() {
@@ -46,6 +49,16 @@ GalenInterface::~GalenInterface() {
     sub_measured_tra_jv.shutdown();
 
     pub_servo_jp.shutdown();
+    pub_CR_distance_vector.shutdown();
+}
+
+void GalenInterface::pub_distance(cVector3d dist) {
+  geometry_msgs::Vector3 msg;
+  msg.x = dist.x();
+  msg.y = dist.y();
+  msg.z = dist.z();
+
+  pub_CR_distance_vector.publish(msg);
 }
 
 cTransform& GalenInterface::get_mobile_cp() {
@@ -154,4 +167,3 @@ void GalenInterface::_measured_rot_jv_CB(geometry_msgs::Vector3ConstPtr msg) {
     measured_rot_jv.push_back(msg->x);
     measured_rot_jv.push_back(msg->y);
 }
-

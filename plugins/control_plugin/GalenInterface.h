@@ -45,6 +45,9 @@ private:
     // robot states publisher, to align actual robot
     ros::Publisher pub_servo_jp;
 
+    //Simulator states publishers
+    ros::Publisher pub_CR_distance_vector;  // The distance vector from the critical regin to the tip of the drill in simulator
+
 public:
     GalenInterface();
     ~GalenInterface();
@@ -73,6 +76,7 @@ public:
     vector<double>& get_measured_cf();
     cTransform&     get_mobile_cp();
     cTransform&     get_tool_cp();
+    void pub_distance(cVector3d dist);
 
     // publisher message
     sensor_msgs::JointState msg_servo_jp;
